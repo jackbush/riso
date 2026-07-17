@@ -1,6 +1,6 @@
-# Risograph Emulator
+# RISO
 
-Simulates risograph printing: upload grayscale images as layers, assign ink colors, and composite them with multiply blending. Exports full-resolution PNG.
+Simulates risograph printing: upload images as layers, assign ink colors, and composite them with multiply blending. Exports full-resolution PNG.
 
 ## Dev
 
