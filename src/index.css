@@ -310,6 +310,36 @@ button:disabled {
   gap: var(--spacing-sm);
 }
 
+.paper-preset-row {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.paper-preset-swatch {
+  flex: 1;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #aaa;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.paper-preset-swatch:hover {
+  transform: scale(1.08);
+  background-color: unset;
+}
+
+.paper-preset-swatch--active {
+  border: 2px solid #000;
+  border-radius: var(--border-radius);
+}
+
+.paper-preset-swatch:active {
+  background-color: unset;
+}
+
 .config-color-swatch {
   width: 32px;
   height: 28px;
