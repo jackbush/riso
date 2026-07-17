@@ -21,22 +21,6 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
           />
         </label>
 
-        {/* Paper grain */}
-        <div className="config-item">
-          <label className="config-label">
-            Paper grain
-            <span className="config-value">{config.grainSize.toFixed(1)}</span>
-          </label>
-          <input
-            type="range"
-            min={0}
-            max={5}
-            step={0.1}
-            value={config.grainSize}
-            onChange={(e) => onChange({ grainSize: parseFloat(e.target.value) })}
-          />
-        </div>
-
         {/* Paper color */}
         <div className="config-item">
           <label className="config-label">Paper color</label>
@@ -61,15 +45,6 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
           </div>
         </div>
 
-        {/* Registration marks */}
-        <label className="config-item config-item--row">
-          <span className="config-label">Reg marks</span>
-          <input
-            type="checkbox"
-            checked={config.showRegMarks}
-            onChange={(e) => onChange({ showRegMarks: e.target.checked })}
-          />
-        </label>
       </div>
     </details>
   );

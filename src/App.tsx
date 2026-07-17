@@ -10,9 +10,7 @@ export function App() {
   const { layers, ...actions } = useLayerState();
   const [config, setConfig] = useState<RisoConfig>({
     jitterEnabled: false,
-    grainSize: 1,
     paperColor: '#FFFDF5',
-    showRegMarks: true,
   });
 
   function handleConfigChange(updates: Partial<RisoConfig>) {

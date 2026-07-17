@@ -17,7 +17,5 @@ export interface Layer {
 
 export interface RisoConfig {
   jitterEnabled: boolean;
-  grainSize: number;
   paperColor: string;
-  showRegMarks: boolean;
 }

@@ -1,6 +1,5 @@
 import { Layer, RisoConfig } from '../types';
 import { composite } from './compositor';
-import { applyGrain, drawRegMarks } from './effects';
 
 const MAX_DIMENSION = 5000;
 const DEFAULT_WIDTH = 800;
@@ -28,56 +27,31 @@ export function getCompositeDimensions(layers: Layer[]): {
   };
 }
 
-interface RenderOptions {
-  includeRegMarks: boolean;
-  scale?: number;
-}
-
 /**
- * Full render pipeline: composite layers → apply grain → draw reg marks.
+ * Full render pipeline: composite layers.
  *
  * @param layers  - Layers to composite
  * @param config  - Riso configuration
- * @param opts    - includeRegMarks: draw crop marks; scale: preview downscale factor (default 1)
+ * @param scale   - Preview downscale factor (default 1)
  * @returns       - Canvas with the rendered result
  */
 export function render(
   layers: Layer[],
   config: RisoConfig,
-  opts: RenderOptions,
+  scale = 1,
 ): HTMLCanvasElement {
   const { width: fullW, height: fullH } = getCompositeDimensions(layers);
-  const scale = opts.scale ?? 1;
   const targetW = Math.round(fullW * scale);
   const targetH = Math.round(fullH * scale);
 
-  // 1. Composite layers
-  const canvas = composite(layers, config, targetW, targetH, fullW);
-
-  // 2. Paper grain
-  if (config.grainSize > 0) {
-    applyGrain(canvas, config.grainSize);
-  }
-
-  // 3. Registration marks (preview only)
-  if (opts.includeRegMarks && config.showRegMarks) {
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      drawRegMarks(ctx, targetW, targetH);
-    }
-  }
-
-  return canvas;
+  return composite(layers, config, targetW, targetH, fullW);
 }
 
 /**
  * Render at full resolution and trigger a PNG download.
  */
 export function exportFullRes(layers: Layer[], config: RisoConfig): void {
-  const canvas = render(layers, config, {
-    includeRegMarks: false,
-    scale: 1,
-  });
+  const canvas = render(layers, config, 1);
 
   canvas.toBlob((blob) => {
     if (!blob) return;

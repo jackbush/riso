@@ -19,7 +19,6 @@ src/
 ├── engine/
 │   ├── grayscale.ts        # toGrayscale() — luminance-weighted RGBA→grey
 │   ├── compositor.ts       # hexToRgb, tintGrayscale, composite (multiply blend)
-│   ├── effects.ts          # applyGrain (simplex noise), drawRegMarks
 │   └── renderer.ts         # getCompositeDimensions, render, exportFullRes
 ├── hooks/
 │   ├── useLayerState.ts    # Layer CRUD, reorder, color/opacity/jitter
@@ -41,7 +40,6 @@ src/
 |---|---|---|
 | Compositing | Canvas `globalCompositeOperation = 'multiply'` | Standard riso simulation |
 | Tinting | Per-pixel lerp: `out = 255 - density*(255 - ink)` where `density = (255-grey)/255` | Black→ink, white→transparent to multiply |
-| Grain | `simplex-noise` 2D at frequency `1/(grainSize*4)`, 8% strength | Paper fiber texture |
 | Layers | Max 7, bottom-to-top draw order, centered within composite canvas | Matches real riso |
 | Canvas size | Max of all uploaded image dimensions, capped at 5000×5000 | A3 @ 300dpi |
 | Preview | Scaled to fit container via ResizeObserver + 150ms debounce | Too slow at full res |
@@ -60,9 +58,6 @@ upload → toGrayscale → stored on Layer.grayscaleData
                     ctx.globalAlpha = layer.opacity
                     ctx.drawImage(tinted, centeredX + jitterX, ...)
                                         ↓
-                              applyGrain (simplex noise)
-                                        ↓
-                              drawRegMarks (preview only)
 ```
 
 ## CSS classes

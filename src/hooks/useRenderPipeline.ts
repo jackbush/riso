@@ -50,10 +50,7 @@ export function useRenderPipeline(
       const targetW = Math.max(1, Math.round(fullW * scale));
       const targetH = Math.max(1, Math.round(fullH * scale));
 
-      const result = render(currentLayers, currentConfig, {
-        includeRegMarks: true,
-        scale,
-      });
+      const result = render(currentLayers, currentConfig, scale);
 
       canvas.width = targetW;
       canvas.height = targetH;
