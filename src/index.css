@@ -199,6 +199,7 @@ button:disabled {
 /* Color Picker */
 .color-picker {
   position: absolute;
+  right: 0;
   z-index: 100;
   background: white;
   border: 1px solid var(--color-border);
