@@ -195,3 +195,70 @@ button:disabled {
   background-color: var(--color-border);
   cursor: not-allowed;
 }
+
+/* Color Picker */
+.color-picker {
+  position: absolute;
+  z-index: 100;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+  display: grid;
+  grid-template-columns: repeat(5, 28px);
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.color-picker-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.color-picker-swatch:hover {
+  transform: scale(1.15);
+}
+
+/* Layer tile extras */
+.layer-drag-handle {
+  cursor: grab;
+  color: #aaa;
+  padding: 0 2px;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.layer-drag-handle:active {
+  cursor: grabbing;
+}
+
+.layer-tile-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.layer-remove-btn {
+  background: none;
+  color: #aaa;
+  padding: 2px 6px;
+  font-size: 1.2rem;
+  line-height: 1;
+  border: none;
+}
+
+.layer-remove-btn:hover {
+  background: none;
+  color: #cc0000;
+}
+
+.opacity-slider {
+  width: 100%;
+  cursor: pointer;
+  accent-color: var(--color-accent);
+}

@@ -211,11 +211,11 @@ src/
 3. [x] **1.2** Types + ink config
 4. [x] **1.3** CSS structure
 5. [x] **1.4** App shell
-6. [ ] **2.1** useLayerState hook
-7. [ ] **2.2** LayerList + LayerTile
-8. [ ] **2.3** ColorPicker
-9. [ ] **2.4** Drag-and-drop
-10. [ ] **2.5** Layer management tests
+6. [x] **2.1** useLayerState hook
+7. [x] **2.2** LayerList + LayerTile
+8. [x] **2.3** ColorPicker
+9. [x] **2.4** Drag-and-drop
+10. [x] **2.5** Layer management tests
 11. [ ] **3.1** Grayscale conversion
 12. [ ] **3.2** Compositor (multiply blend)
 13. [ ] **3.3** Paper grain + texture effects

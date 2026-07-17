@@ -1,38 +1,53 @@
 import { InkColor } from '../types';
 
 /**
- * Official Riso ink palette with approximate RGB hex values
- * Based on standard Riso color specifications
+ * Official Risograph ink palette with accurate RGB hex approximations.
+ * Based on Riso ink swatch references and community color guides.
  */
 export const INKS: InkColor[] = [
+  // Neutrals
   { name: 'Black', hex: '#000000' },
   { name: 'White', hex: '#FFFFFF' },
-  { name: 'Red', hex: '#FF0000' },
-  { name: 'Crimson', hex: '#DC143C' },
-  { name: 'Magenta', hex: '#FF00FF' },
-  { name: 'Pink', hex: '#FF69B4' },
-  { name: 'Yellow', hex: '#FFFF00' },
-  { name: 'Gold', hex: '#FFD700' },
-  { name: 'Sapphire', hex: '#0F52BA' },
-  { name: 'Blue', hex: '#0066FF' },
-  { name: 'Cyan', hex: '#00FFFF' },
-  { name: 'Aqua', hex: '#00CED1' },
-  { name: 'Teal', hex: '#008080' },
-  { name: 'Green', hex: '#00AA00' },
-  { name: 'Lime', hex: '#00FF00' },
-  { name: 'Olive', hex: '#808000' },
-  { name: 'Orange', hex: '#FF8800' },
-  { name: 'Brown', hex: '#8B4513' },
-  { name: 'Purple', hex: '#800080' },
-  { name: 'Violet', hex: '#8B00FF' },
-  { name: 'Gray', hex: '#808080' },
-  { name: 'Lime Green', hex: '#32CD32' },
-  { name: 'Forest Green', hex: '#228B22' },
-  { name: 'Navy', hex: '#000080' },
-  { name: 'Turquoise', hex: '#40E0D0' },
-  { name: 'Coral', hex: '#FF7F50' },
-  { name: 'Peach', hex: '#FFCCCC' },
-  { name: 'Silver', hex: '#C0C0C0' },
-  { name: 'Maroon', hex: '#800000' },
-  { name: 'Indigo', hex: '#4B0082' },
+
+  // Reds & Pinks
+  { name: 'Bright Red', hex: '#F15060' },
+  { name: 'Red', hex: '#FF665E' },
+  { name: 'Scarlet', hex: '#FF585B' },
+  { name: 'Crimson', hex: '#E45D50' },
+  { name: 'Fluorescent Pink', hex: '#FF48B0' },
+  { name: 'Hot Pink', hex: '#FF4C8E' },
+  { name: 'Flat Gold', hex: '#BB8B41' },
+
+  // Oranges & Yellows
+  { name: 'Orange', hex: '#FF6C2F' },
+  { name: 'Sunflower', hex: '#FFB511' },
+  { name: 'Yellow', hex: '#FFE627' },
+  { name: 'Fluorescent Orange', hex: '#FF7477' },
+
+  // Blues
+  { name: 'Blue', hex: '#0078BF' },
+  { name: 'Federal Blue', hex: '#3D5588' },
+  { name: 'Cornflower', hex: '#62A8E5' },
+  { name: 'Marine Red', hex: '#D2515E' },
+  { name: 'Midnight', hex: '#435060' },
+
+  // Greens & Teals
+  { name: 'Green', hex: '#00A95C' },
+  { name: 'Light Teal', hex: '#00AA93' },
+  { name: 'Sea Blue', hex: '#0074A2' },
+  { name: 'Lake', hex: '#235BA8' },
+  { name: 'Moss', hex: '#68724D' },
+  { name: 'Spruce', hex: '#4A635D' },
+  { name: 'Forest', hex: '#516E5A' },
+  { name: 'Hunter Green', hex: '#407060' },
+
+  // Purples
+  { name: 'Violet', hex: '#9D7AD2' },
+  { name: 'Purple', hex: '#765BA7' },
+  { name: 'Grape', hex: '#6C5D80' },
+
+  // Grays & Misc
+  { name: 'Medium Blue', hex: '#4255A4' },
+  { name: 'Gray', hex: '#928D88' },
+  { name: 'Metallic Gold', hex: '#AC936E' },
 ];

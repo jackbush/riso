@@ -1,15 +1,20 @@
-export function SettingsPanel() {
+import { Layer } from '../types';
+import { LayerActions } from '../hooks/useLayerState';
+import { LayerList } from './LayerList';
+
+interface SettingsPanelProps {
+  layers: Layer[];
+  actions: LayerActions;
+}
+
+export function SettingsPanel({ layers, actions }: SettingsPanelProps) {
   return (
     <div className="settings-panel">
-      <div className="layer-list">
-        <div style={{ padding: '1rem', textAlign: 'center', color: '#999' }}>
-          No layers yet. Add a layer to get started.
-        </div>
-      </div>
+      <LayerList layers={layers} actions={actions} />
       <div className="config-panel">
         <div className="config-label">Configuration</div>
         <div style={{ fontSize: '0.875rem', color: '#666' }}>
-          Settings coming soon...
+          Settings coming in Phase 4.
         </div>
       </div>
     </div>
