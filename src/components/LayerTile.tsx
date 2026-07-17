@@ -27,6 +27,7 @@ export function LayerTile({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const thumbnailRef = useRef<HTMLCanvasElement>(null);
   const [showPicker, setShowPicker] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: layer.id });
@@ -55,21 +56,33 @@ export function LayerTile({
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setIsLoading(true);
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
+      const MAX = 5000;
+      if (img.width > MAX || img.height > MAX) {
+        alert(
+          `Image is too large (${img.width}×${img.height}px). ` +
+          `Maximum allowed size is ${MAX}×${MAX}px.`,
+        );
+        URL.revokeObjectURL(url);
+        setIsLoading(false);
+        return;
+      }
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
-      if (!ctx) { URL.revokeObjectURL(url); return; }
+      if (!ctx) { URL.revokeObjectURL(url); setIsLoading(false); return; }
       ctx.drawImage(img, 0, 0);
       const imageData = ctx.getImageData(0, 0, img.width, img.height);
       const grayscaleData = toGrayscale(imageData);
       onImageUpload(imageData, grayscaleData);
       URL.revokeObjectURL(url);
+      setIsLoading(false);
     };
-    img.onerror = () => URL.revokeObjectURL(url);
+    img.onerror = () => { URL.revokeObjectURL(url); setIsLoading(false); };
     img.src = url;
     // Reset input so same file can be re-selected
     e.target.value = '';
@@ -87,16 +100,20 @@ export function LayerTile({
         ⠿
       </span>
 
-      {/* Thumbnail */}
-      <canvas
-        ref={thumbnailRef}
-        className="layer-tile-thumbnail"
-        width={40}
-        height={40}
-        onClick={() => fileInputRef.current?.click()}
-        title="Click to upload image"
-        style={{ cursor: 'pointer' }}
-      />
+      {/* Thumbnail / loading indicator */}
+      <div className="layer-tile-thumbnail-wrap" onClick={() => fileInputRef.current?.click()}>
+        {isLoading ? (
+          <div className="layer-tile-loading" title="Processing…" />
+        ) : (
+          <canvas
+            ref={thumbnailRef}
+            className="layer-tile-thumbnail"
+            width={40}
+            height={40}
+            title={layer.grayscaleData ? 'Click to replace image' : 'Click to upload image'}
+          />
+        )}
+      </div>
 
       <input
         ref={fileInputRef}

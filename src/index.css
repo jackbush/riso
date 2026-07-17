@@ -368,3 +368,38 @@ details[open] .config-panel-summary::before {
 .export-btn:hover {
   background-color: #333;
 }
+
+/* Preview pane empty state */
+.preview-empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #aaa;
+  font-size: 0.875rem;
+  pointer-events: none;
+  padding: 1rem;
+}
+
+/* Layer tile thumbnail wrapper + loading state */
+.layer-tile-thumbnail-wrap {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.layer-tile-loading {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius);
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

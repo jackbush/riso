@@ -13,9 +13,20 @@ export function PreviewPane({ layers, config }: PreviewPaneProps) {
 
   useRenderPipeline(layers, config, canvasRef, containerRef);
 
+  const isEmpty = layers.length === 0;
+
   return (
     <div className="preview-pane" ref={containerRef}>
-      <canvas className="preview-canvas" ref={canvasRef} />
+      {isEmpty && (
+        <div className="preview-empty">
+          <p>Add a layer and upload an image to get started.</p>
+        </div>
+      )}
+      <canvas
+        className="preview-canvas"
+        ref={canvasRef}
+        style={{ display: isEmpty ? 'none' : 'block' }}
+      />
     </div>
   );
 }

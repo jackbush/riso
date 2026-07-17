@@ -224,10 +224,10 @@ src/
 16. [x] **3.6** Render engine tests
 17. [x] **4.1** ConfigPanel
 18. [x] **4.2** Download button
-19. [ ] **5.1** Centre-align layers
-20. [ ] **5.2** Real-time preview wiring
-21. [ ] **5.3** Edge cases
-22. [ ] **5.4** Smoke tests
+19. [x] **5.1** Centre-align layers
+20. [x] **5.2** Real-time preview wiring
+21. [x] **5.3** Edge cases
+22. [x] **5.4** Smoke tests
 
 ---
 
