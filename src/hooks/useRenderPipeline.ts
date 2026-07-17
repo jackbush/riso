@@ -47,9 +47,6 @@ export function useRenderPipeline(
         1,
       );
 
-      const targetW = Math.max(1, Math.round(fullW * scale));
-      const targetH = Math.max(1, Math.round(fullH * scale));
-
       const result = render(currentLayers, currentConfig, scale);
 
       canvas.width = result.width;
