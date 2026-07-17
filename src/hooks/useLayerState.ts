@@ -4,24 +4,20 @@ import { Layer, InkColor } from '../types';
 import { INKS } from '../config/inks';
 
 const MAX_LAYERS = 7;
-const JITTER_RANGE = 20;
-
 function randomInk(): InkColor {
   const palette = INKS.filter((ink) => ink.name !== 'White');
   return palette[Math.floor(Math.random() * palette.length)];
 }
 
-function randomJitter(): number {
-  return Math.round((Math.random() * 2 - 1) * JITTER_RANGE);
-}
 
 export interface LayerActions {
   addLayer: () => void;
   removeLayer: (id: string) => void;
   reorderLayers: (activeId: string, overId: string) => void;
+  updateLayerName: (id: string, name: string) => void;
   updateLayerColor: (id: string, inkColor: InkColor) => void;
   updateLayerOpacity: (id: string, opacity: number) => void;
-  updateLayerJitter: (id: string, x: number, y: number) => void;
+  updateLayerOffset: (id: string, x: number, y: number) => void;
   setLayerImage: (id: string, imageData: ImageData, grayscaleData: ImageData) => void;
   toggleLayerVisible: (id: string) => void;
 }
@@ -43,8 +39,8 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
         grayscaleData: null,
         inkColor: randomInk(),
         opacity: 1,
-        jitterX: randomJitter(),
-        jitterY: randomJitter(),
+        offsetX: 0,
+        offsetY: 0,
         visible: true,
       };
       return [...prev, newLayer];
@@ -64,6 +60,12 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
     });
   }
 
+  function updateLayerName(id: string, name: string) {
+    setLayers((prev) =>
+      prev.map((l) => (l.id === id ? { ...l, name } : l))
+    );
+  }
+
   function updateLayerColor(id: string, inkColor: InkColor) {
     setLayers((prev) =>
       prev.map((l) => (l.id === id ? { ...l, inkColor } : l))
@@ -76,9 +78,9 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
     );
   }
 
-  function updateLayerJitter(id: string, x: number, y: number) {
+  function updateLayerOffset(id: string, x: number, y: number) {
     setLayers((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, jitterX: x, jitterY: y } : l))
+      prev.map((l) => (l.id === id ? { ...l, offsetX: x, offsetY: y } : l))
     );
   }
 
@@ -99,9 +101,10 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
     addLayer,
     removeLayer,
     reorderLayers,
+    updateLayerName,
     updateLayerColor,
     updateLayerOpacity,
-    updateLayerJitter,
+    updateLayerOffset,
     setLayerImage,
     toggleLayerVisible,
   };

@@ -122,28 +122,23 @@ describe('Reorder smoke', () => {
   });
 });
 
-// ─── 4. Jitter toggle ────────────────────────────────────────────────────────
+// ─── 4. Offset toggle ────────────────────────────────────────────────────────
 
-describe('Jitter smoke', () => {
-  it('jitterX and jitterY are set at creation (non-zero most of the time)', () => {
-    // Run multiple times — at least one pair should be non-zero
+describe('Offset smoke', () => {
+  it('offsetX and offsetY default to 0 at creation', () => {
     const { result } = renderHook(() => useLayerState());
-    act(() => {
-      for (let i = 0; i < 5; i++) result.current.addLayer();
-    });
-    const hasJitter = result.current.layers.some(
-      (l) => l.jitterX !== 0 || l.jitterY !== 0,
-    );
-    expect(hasJitter).toBe(true);
+    act(() => result.current.addLayer());
+    expect(result.current.layers[0].offsetX).toBe(0);
+    expect(result.current.layers[0].offsetY).toBe(0);
   });
 
-  it('updateLayerJitter stores exact values', () => {
+  it('updateLayerOffset stores exact values', () => {
     const { result } = renderHook(() => useLayerState());
     act(() => result.current.addLayer());
     const id = result.current.layers[0].id;
-    act(() => result.current.updateLayerJitter(id, 42, -17));
-    expect(result.current.layers[0].jitterX).toBe(42);
-    expect(result.current.layers[0].jitterY).toBe(-17);
+    act(() => result.current.updateLayerOffset(id, 42, -17));
+    expect(result.current.layers[0].offsetX).toBe(42);
+    expect(result.current.layers[0].offsetY).toBe(-17);
   });
 });
 

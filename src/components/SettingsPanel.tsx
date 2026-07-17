@@ -43,7 +43,7 @@ export function SettingsPanel({
       <details className="pane" open>
         <summary className="pane-summary">Layers</summary>
         <div className="pane-body">
-          <LayerList layers={layers} actions={actions} jitterEnabled={config.jitterEnabled} />
+          <LayerList layers={layers} actions={actions} offsetEnabled={config.offsetEnabled} opacityEnabled={config.opacityEnabled} />
         </div>
       </details>
 

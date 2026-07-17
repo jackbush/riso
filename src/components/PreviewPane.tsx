@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Layer, RisoConfig } from '../types';
 import { useRenderPipeline } from '../hooks/useRenderPipeline';
 
@@ -10,14 +10,19 @@ interface PreviewPaneProps {
 export function PreviewPane({ layers, config }: PreviewPaneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasReady, setCanvasReady] = useState(false);
 
-  useRenderPipeline(layers, config, canvasRef, containerRef);
+  const isEmpty = !layers.some((l) => l.grayscaleData);
 
-  const isEmpty = layers.length === 0;
+  useEffect(() => {
+    if (isEmpty) setCanvasReady(false);
+  }, [isEmpty]);
+
+  useRenderPipeline(layers, config, canvasRef, containerRef, () => setCanvasReady(true));
 
   return (
     <div className="preview-pane" ref={containerRef}>
-      {isEmpty && (
+      {!canvasReady && (
         <div className="preview-empty">
           <p>Add a layer and upload an image to get started.</p>
         </div>
@@ -25,7 +30,7 @@ export function PreviewPane({ layers, config }: PreviewPaneProps) {
       <canvas
         className="preview-canvas"
         ref={canvasRef}
-        style={{ display: isEmpty ? 'none' : 'block' }}
+        style={{ display: canvasReady ? 'block' : 'none' }}
       />
     </div>
   );

@@ -17,40 +17,29 @@ interface ConfigPanelProps {
 export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
   const [hexInput, setHexInput] = useState(config.paperColor);
 
-  // Sync when a preset is clicked (config.paperColor changes externally)
   useEffect(() => {
     setHexInput(config.paperColor);
   }, [config.paperColor]);
 
   return (
     <>
-      {/* Jitter */}
-      <label className="config-item config-item--row">
-        <span className="config-label">Jitter</span>
-        <input
-          type="checkbox"
-          checked={config.jitterEnabled}
-          onChange={(e) => onChange({ jitterEnabled: e.target.checked })}
-        />
-      </label>
-
-      {/* Safe area */}
-      <div className="config-item">
-        <label className="config-label">Safe area (px)</label>
-        <input
-          type="number"
-          min={0}
-          max={500}
-          step={10}
-          value={config.safeArea}
-          onChange={(e) => onChange({ safeArea: Math.max(0, parseInt(e.target.value, 10) || 0) })}
-          className="config-hex-input"
-        />
-      </div>
-
       {/* Paper color */}
       <div className="config-item">
-        <label className="config-label">Paper color</label>
+        <label className="config-item config-item--row">
+          <span className="config-label">Paper color</span>
+          <input
+            type="text"
+            value={hexInput}
+            onChange={(e) => {
+              const v = e.target.value;
+              setHexInput(v);
+              if (/^#[0-9A-Fa-f]{6}$/.test(v.trim())) onChange({ paperColor: v.trim() });
+            }}
+            maxLength={7}
+            className="config-inline-input"
+            spellCheck={false}
+          />
+        </label>
         <div className="paper-preset-row">
           {PAPER_PRESETS.map((preset) => (
             <button
@@ -62,19 +51,41 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
             />
           ))}
         </div>
-        <input
-          type="text"
-          value={hexInput}
-          onChange={(e) => {
-            const v = e.target.value;
-            setHexInput(v);
-            if (/^#[0-9A-Fa-f]{6}$/.test(v.trim())) onChange({ paperColor: v.trim() });
-          }}
-          maxLength={7}
-          className="config-hex-input"
-          spellCheck={false}
-        />
       </div>
+
+      {/* Safe area */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Safe area (px)</span>
+        <input
+          type="number"
+          min={0}
+          max={500}
+          step={10}
+          value={config.safeArea}
+          onChange={(e) => onChange({ safeArea: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+          className="config-inline-input"
+        />
+      </label>
+
+      {/* Layer opacity */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Layer opacity</span>
+        <input
+          type="checkbox"
+          checked={config.opacityEnabled}
+          onChange={(e) => onChange({ opacityEnabled: e.target.checked })}
+        />
+      </label>
+
+      {/* Layer offset */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Layer offset</span>
+        <input
+          type="checkbox"
+          checked={config.offsetEnabled}
+          onChange={(e) => onChange({ offsetEnabled: e.target.checked })}
+        />
+      </label>
     </>
   );
 }

@@ -10,13 +10,14 @@ export interface Layer {
   grayscaleData: ImageData | null;
   inkColor: InkColor;
   opacity: number;
-  jitterX: number;
-  jitterY: number;
+  offsetX: number;
+  offsetY: number;
   visible: boolean;
 }
 
 export interface RisoConfig {
-  jitterEnabled: boolean;
+  offsetEnabled: boolean;
+  opacityEnabled: boolean;
   paperColor: string;
   safeArea: number; // pixels at full resolution
 }

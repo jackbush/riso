@@ -134,13 +134,13 @@ describe('useLayerState', () => {
     expect(result.current.layers[2].name).toBe('Layer 3');
   });
 
-  it('updateLayerJitter sets jitter values', () => {
+  it('updateLayerOffset sets offset values', () => {
     const { result } = renderHook(() => useLayerState());
     act(() => { result.current.addLayer(); });
     const id = result.current.layers[0].id;
-    act(() => { result.current.updateLayerJitter(id, 10, -15); });
-    expect(result.current.layers[0].jitterX).toBe(10);
-    expect(result.current.layers[0].jitterY).toBe(-15);
+    act(() => { result.current.updateLayerOffset(id, 10, -15); });
+    expect(result.current.layers[0].offsetX).toBe(10);
+    expect(result.current.layers[0].offsetY).toBe(-15);
   });
 });
 

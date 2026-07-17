@@ -27,8 +27,8 @@ function makeLayer(overrides: Partial<Layer> = {}): Layer {
     grayscaleData: null,
     inkColor: { name: 'Black', hex: '#000000' },
     opacity: 1,
-    jitterX: 0,
-    jitterY: 0,
+    offsetX: 0,
+    offsetY: 0,
     visible: true,
     ...overrides,
   };
@@ -150,12 +150,12 @@ describe('getCompositeDimensions', () => {
     expect(dims.height).toBe(200);
   });
 
-  it('caps at 5000', () => {
+  it('caps at 6400', () => {
     const layers: Layer[] = [
-      makeLayer({ grayscaleData: makeImageData(6000, 3000, 0, 0, 0) }),
+      makeLayer({ grayscaleData: makeImageData(8000, 3000, 0, 0, 0) }),
     ];
     const dims = getCompositeDimensions(layers);
-    expect(dims.width).toBe(5000);
+    expect(dims.width).toBe(6400);
     expect(dims.height).toBe(3000);
   });
 

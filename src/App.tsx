@@ -9,7 +9,8 @@ import './index.css';
 export function App() {
   const { layers, ...actions } = useLayerState();
   const [config, setConfig] = useState<RisoConfig>({
-    jitterEnabled: false,
+    offsetEnabled: false,
+    opacityEnabled: false,
     paperColor: '#FFFDF5',
     safeArea: 0,
   });

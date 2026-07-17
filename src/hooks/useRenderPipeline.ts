@@ -14,6 +14,7 @@ export function useRenderPipeline(
   config: RisoConfig,
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   containerRef: React.RefObject<HTMLDivElement | null>,
+  onRender?: () => void,
 ): void {
   const timerRef = useRef<number | undefined>(undefined);
 
@@ -21,8 +22,10 @@ export function useRenderPipeline(
   // the latest layers/config without being recreated on every render.
   const layersRef = useRef(layers);
   const configRef = useRef(config);
+  const onRenderRef = useRef(onRender);
   layersRef.current = layers;
   configRef.current = config;
+  onRenderRef.current = onRender;
 
   // scheduleRender is stable (only depends on the canvas/container refs)
   // and reads current data through layersRef / configRef.
@@ -35,6 +38,8 @@ export function useRenderPipeline(
 
       const currentLayers = layersRef.current;
       const currentConfig = configRef.current;
+
+      if (!currentLayers.some((l) => l.grayscaleData)) return;
 
       const { width: fullW, height: fullH } = getCompositeDimensions(currentLayers);
 
@@ -52,7 +57,10 @@ export function useRenderPipeline(
       canvas.width = result.width;
       canvas.height = result.height;
       const ctx = canvas.getContext('2d');
-      if (ctx) ctx.drawImage(result, 0, 0);
+      if (ctx) {
+        ctx.drawImage(result, 0, 0);
+        onRenderRef.current?.();
+      }
     }, DEBOUNCE_MS);
   }, [canvasRef, containerRef]);
 

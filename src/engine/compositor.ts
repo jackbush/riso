@@ -55,7 +55,7 @@ export function tintGrayscale(
  * Composite all visible layers onto a canvas using multiply blend mode.
  *
  * @param layers     - Array of layers (composited bottom to top)
- * @param config     - Riso config (paper color, jitter toggle)
+ * @param config     - Riso config (paper color, offset toggle)
  * @param targetW    - Output canvas width (may be scaled for preview)
  * @param targetH    - Output canvas height
  * @param fullW      - Full-resolution composite width (for computing scale)
@@ -101,10 +101,10 @@ export function composite(
     let drawX = safe + (targetW - drawW) / 2;
     let drawY = safe + (targetH - drawH) / 2;
 
-    // Apply jitter offset (scaled)
-    if (config.jitterEnabled) {
-      drawX += layer.jitterX * scale;
-      drawY += layer.jitterY * scale;
+    // Apply offset (scaled)
+    if (config.offsetEnabled) {
+      drawX += layer.offsetX * scale;
+      drawY += layer.offsetY * scale;
     }
 
     // Draw with multiply blend
