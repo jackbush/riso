@@ -2,14 +2,14 @@
   --color-bg: #ffffff;
   --color-fg: #000000;
   --color-border: #cccccc;
-  --color-accent: #0066cc;
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
+  --color-accent: #1a1a1a;
+  --spacing-xs: 0.2rem;
+  --spacing-sm: 0.35rem;
+  --spacing-md: 0.65rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.4rem;
   --border-radius: 4px;
-  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family: 'Source Code Pro', monospace;
 }
 
 * {
@@ -198,11 +198,11 @@ button {
 }
 
 button:hover {
-  background-color: #0052a3;
+  background-color: #333333;
 }
 
 button:active {
-  background-color: #003d7a;
+  background-color: #444444;
 }
 
 button:disabled {
@@ -269,7 +269,7 @@ button:disabled {
 
 .layer-remove-btn:hover {
   background: none;
-  color: #cc0000;
+  color: var(--color-accent);
 }
 
 .opacity-slider {
@@ -308,7 +308,7 @@ button:disabled {
 }
 
 .paper-preset-swatch--active {
-  border: 2px solid #000;
+  border: 2px solid var(--color-accent);
   border-radius: var(--border-radius);
 }
 
@@ -318,7 +318,7 @@ button:disabled {
 
 .config-hex-input {
   flex: 1;
-  font-family: monospace;
+  font-family: inherit;
   font-size: 0.875rem;
 }
 
@@ -355,11 +355,6 @@ button:disabled {
 
 .export-btn {
   width: 100%;
-  background-color: #1a1a1a;
-}
-
-.export-btn:hover {
-  background-color: #333;
 }
 
 /* Preview pane empty state */
