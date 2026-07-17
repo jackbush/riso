@@ -11,6 +11,14 @@ npm run build    # type-check + production build
 npm run test     # vitest
 ```
 
+## Deploy
+
+Deployed to `jackbush.github.io/riso/` via GitHub Actions on every push to `main`.
+
+- Workflow: `.github/workflows/deploy.yml` — runs `npm ci && npm run build`, uploads `dist/` as a Pages artifact
+- Vite `base: '/riso/'` ensures asset paths are correct for the subdirectory
+- One-time setup: repo Settings → Pages → Source → **GitHub Actions**
+
 ## Structure
 
 ```
@@ -30,7 +38,7 @@ src/
 │   ├── LayerList.tsx       # @dnd-kit sortable list
 │   ├── LayerTile.tsx       # Thumbnail, opacity slider, color swatch, jitter inputs
 │   ├── ColorPicker.tsx     # Ink palette popup (click-outside closes)
-│   └── ConfigPanel.tsx     # Jitter toggle, grain slider, paper color, reg marks
+│   └── ConfigPanel.tsx     # Jitter toggle, safe area, paper color presets + hex input
 └── types.ts                # Layer, InkColor, RisoConfig
 ```
 
@@ -43,7 +51,7 @@ src/
 | Layers | Max 7, bottom-to-top draw order, centered within composite canvas | Matches real riso |
 | Canvas size | Max of all uploaded image dimensions, capped at 5000×5000 | A3 @ 300dpi |
 | Preview | Scaled to fit container via ResizeObserver + 150ms debounce | Too slow at full res |
-| Export | Full-res render without reg marks, triggers PNG download | `canvas.toBlob` |
+| Export | Full-res render triggers PNG download | `canvas.toBlob` |
 | State | `useLayerState` hook in App, no external store | Manageable surface |
 | DnD | `@dnd-kit/core` + `@dnd-kit/sortable` | Lightweight, accessible |
 
@@ -62,6 +70,16 @@ upload → toGrayscale → stored on Layer.grayscaleData
 
 ## CSS classes
 
-`.preview-pane` `.preview-canvas` `.settings-panel` `.layer-list` `.layer-tile` `.layer-tile-thumbnail` `.layer-tile-content` `.layer-tile-actions` `.color-swatch` `.color-picker` `.color-picker-swatch` `.config-panel` `.config-body` `.config-item` `.jitter-inputs` `.export-btn`
+Layout: `.app` `.preview-pane` `.preview-canvas` `.settings-panel`
+
+Panes: `.pane` `.pane-summary` `.pane-body`
+
+Layers: `.layer-list` `.layer-tile` `.layer-tile-thumbnail-wrap` `.layer-tile-thumbnail` `.layer-tile-loading` `.layer-tile-content` `.layer-tile-name` `.layer-tile-actions` `.layer-drag-handle` `.layer-remove-btn` `.opacity-slider`
+
+Color picker: `.color-swatch` `.color-picker` `.color-picker-swatch`
+
+Config: `.config-item` `.config-item--row` `.config-label` `.config-hex-input` `.jitter-inputs` `.jitter-label` `.jitter-input` `.paper-preset-row` `.paper-preset-swatch` `.paper-preset-swatch--active`
+
+Export: `.export-btn`
 
 All custom properties defined in `:root` in `index.css`.
