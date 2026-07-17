@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { RisoConfig } from '../types';
 
 const PAPER_PRESETS = [
@@ -14,6 +15,13 @@ interface ConfigPanelProps {
 }
 
 export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
+  const [hexInput, setHexInput] = useState(config.paperColor);
+
+  // Sync when a preset is clicked (config.paperColor changes externally)
+  useEffect(() => {
+    setHexInput(config.paperColor);
+  }, [config.paperColor]);
+
   return (
     <>
       {/* Jitter */}
@@ -56,10 +64,11 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         </div>
         <input
           type="text"
-          value={config.paperColor}
+          value={hexInput}
           onChange={(e) => {
-            const v = e.target.value.trim();
-            if (/^#[0-9A-Fa-f]{6}$/.test(v)) onChange({ paperColor: v });
+            const v = e.target.value;
+            setHexInput(v);
+            if (/^#[0-9A-Fa-f]{6}$/.test(v.trim())) onChange({ paperColor: v.trim() });
           }}
           maxLength={7}
           className="config-hex-input"
