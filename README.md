@@ -49,7 +49,7 @@ src/
 | Compositing | Canvas `globalCompositeOperation = 'multiply'` | Standard riso simulation |
 | Tinting | Per-pixel lerp: `out = 255 - density*(255 - ink)` where `density = (255-grey)/255` | Black→ink, white→transparent to multiply |
 | Layers | Max 7, bottom-to-top draw order, centered within composite canvas | Matches real riso |
-| Canvas size | Max of all uploaded image dimensions, capped at 5000×5000 | A3 @ 300dpi |
+| Canvas size | Max of all uploaded image dimensions, capped at 6400×6400 | ~A3 @ 400dpi |
 | Preview | Scaled to fit container via ResizeObserver + 150ms debounce | Too slow at full res |
 | Export | Full-res render triggers PNG download | `canvas.toBlob` |
 | State | `useLayerState` hook in App, no external store | Manageable surface |

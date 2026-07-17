@@ -1,7 +1,7 @@
 import { Layer, RisoConfig } from '../types';
 import { composite } from './compositor';
 
-const MAX_DIMENSION = 5000;
+const MAX_DIMENSION = 6400;
 const DEFAULT_WIDTH = 800;
 const DEFAULT_HEIGHT = 600;
 

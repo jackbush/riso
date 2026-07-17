@@ -60,7 +60,7 @@ export function LayerTile({
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      const MAX = 5000;
+      const MAX = 6400;
       if (img.width > MAX || img.height > MAX) {
         alert(
           `Image is too large (${img.width}×${img.height}px). ` +

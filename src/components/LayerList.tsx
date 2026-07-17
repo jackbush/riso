@@ -45,11 +45,6 @@ export function LayerList({ layers, actions, jitterEnabled }: LayerListProps) {
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={layers.map((l) => l.id)} strategy={verticalListSortingStrategy}>
-          {layers.length === 0 && (
-            <div style={{ padding: '1rem', textAlign: 'center', color: '#999', fontSize: '0.875rem' }}>
-              No layers yet. Add a layer to get started.
-            </div>
-          )}
           {layers.map((layer) => (
             <LayerTile
               key={layer.id}

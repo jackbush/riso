@@ -78,7 +78,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  min-height: 120px;
 }
 
 .layer-tile {
@@ -142,17 +141,12 @@ body {
 }
 
 .pane-summary {
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-family: 'Michroma', sans-serif;
+  font-size: 2rem;
   padding: var(--spacing-md);
   cursor: pointer;
   user-select: none;
   list-style: none;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
 }
 
 .pane-summary::-webkit-details-marker {
@@ -160,13 +154,7 @@ body {
 }
 
 .pane-summary::before {
-  content: '▶';
-  font-size: 0.5rem;
-  transition: transform 0.15s;
-}
-
-details[open] .pane-summary::before {
-  transform: rotate(90deg);
+  display: none;
 }
 
 .pane-body {
@@ -376,12 +364,8 @@ button:disabled {
 
 /* Preview pane empty state */
 .preview-empty {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   text-align: center;
-  color: #aaa;
+  color: #111111;
   font-size: 0.875rem;
   pointer-events: none;
   padding: 1rem;
