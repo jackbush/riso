@@ -357,7 +357,14 @@ button:disabled {
   border-radius: var(--border-radius);
 }
 
-/* Export button */
+/* Export pane */
+.export-dimensions {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+  font-variant-numeric: tabular-nums;
+}
+
 .export-btn {
   width: 100%;
   background-color: #1a1a1a;
