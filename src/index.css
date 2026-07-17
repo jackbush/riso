@@ -262,3 +262,109 @@ button:disabled {
   cursor: pointer;
   accent-color: var(--color-accent);
 }
+
+/* Config panel */
+.config-panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-bg);
+  overflow: hidden;
+}
+
+.config-panel-summary {
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.config-panel-summary::before {
+  content: '▶';
+  font-size: 0.625rem;
+  transition: transform 0.15s;
+}
+
+details[open] .config-panel-summary::before {
+  transform: rotate(90deg);
+}
+
+.config-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.config-item--row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.config-value {
+  font-weight: 400;
+  color: #666;
+  margin-left: var(--spacing-xs);
+}
+
+.config-color-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.config-color-swatch {
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.config-hex-input {
+  flex: 1;
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+/* Jitter inputs on layer tile */
+.jitter-inputs {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: 2px;
+}
+
+.jitter-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.jitter-input {
+  width: 52px;
+  padding: 2px 4px;
+  font-size: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+}
+
+/* Export button */
+.export-btn {
+  width: 100%;
+  background-color: #1a1a1a;
+}
+
+.export-btn:hover {
+  background-color: #333;
+}

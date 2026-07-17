@@ -21,9 +21,10 @@ const MAX_LAYERS = 7;
 interface LayerListProps {
   layers: Layer[];
   actions: LayerActions;
+  jitterEnabled: boolean;
 }
 
-export function LayerList({ layers, actions }: LayerListProps) {
+export function LayerList({ layers, actions, jitterEnabled }: LayerListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -53,9 +54,11 @@ export function LayerList({ layers, actions }: LayerListProps) {
             <LayerTile
               key={layer.id}
               layer={layer}
+              jitterEnabled={jitterEnabled}
               onRemove={() => actions.removeLayer(layer.id)}
               onColorChange={(ink: InkColor) => actions.updateLayerColor(layer.id, ink)}
               onOpacityChange={(opacity: number) => actions.updateLayerOpacity(layer.id, opacity)}
+              onJitterChange={(x: number, y: number) => actions.updateLayerJitter(layer.id, x, y)}
               onImageUpload={(imageData: ImageData, grayscaleData: ImageData) =>
                 actions.setLayerImage(layer.id, imageData, grayscaleData)
               }

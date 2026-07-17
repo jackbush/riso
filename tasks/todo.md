@@ -222,8 +222,8 @@ src/
 14. [x] **3.4** Registration marks
 15. [x] **3.5** Render pipeline hook
 16. [x] **3.6** Render engine tests
-17. [ ] **4.1** ConfigPanel
-18. [ ] **4.2** Download button
+17. [x] **4.1** ConfigPanel
+18. [x] **4.2** Download button
 19. [ ] **5.1** Centre-align layers
 20. [ ] **5.2** Real-time preview wiring
 21. [ ] **5.3** Edge cases

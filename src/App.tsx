@@ -2,22 +2,33 @@ import { useState } from 'react';
 import { PreviewPane } from './components/PreviewPane';
 import { SettingsPanel } from './components/SettingsPanel';
 import { useLayerState } from './hooks/useLayerState';
+import { exportFullRes } from './engine/renderer';
 import { RisoConfig } from './types';
 import './index.css';
 
 export function App() {
   const { layers, ...actions } = useLayerState();
-  const [config] = useState<RisoConfig>({
+  const [config, setConfig] = useState<RisoConfig>({
     jitterEnabled: false,
     grainSize: 1,
     paperColor: '#FFFDF5',
     showRegMarks: true,
   });
 
+  function handleConfigChange(updates: Partial<RisoConfig>) {
+    setConfig((prev) => ({ ...prev, ...updates }));
+  }
+
   return (
     <div className="app">
       <PreviewPane layers={layers} config={config} />
-      <SettingsPanel layers={layers} actions={actions} />
+      <SettingsPanel
+        layers={layers}
+        actions={actions}
+        config={config}
+        onConfigChange={handleConfigChange}
+        onExport={() => exportFullRes(layers, config)}
+      />
     </div>
   );
 }

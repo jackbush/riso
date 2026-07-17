@@ -7,17 +7,21 @@ import { toGrayscale } from '../engine/grayscale';
 
 interface LayerTileProps {
   layer: Layer;
+  jitterEnabled: boolean;
   onRemove: () => void;
   onColorChange: (inkColor: InkColor) => void;
   onOpacityChange: (opacity: number) => void;
+  onJitterChange: (x: number, y: number) => void;
   onImageUpload: (imageData: ImageData, grayscaleData: ImageData) => void;
 }
 
 export function LayerTile({
   layer,
+  jitterEnabled,
   onRemove,
   onColorChange,
   onOpacityChange,
+  onJitterChange,
   onImageUpload,
 }: LayerTileProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -102,7 +106,7 @@ export function LayerTile({
         onChange={handleFileChange}
       />
 
-      {/* Name + opacity */}
+      {/* Name + opacity + jitter */}
       <div className="layer-tile-content">
         <span className="layer-tile-name">{layer.name}</span>
         <input
@@ -115,6 +119,32 @@ export function LayerTile({
           onChange={(e) => onOpacityChange(parseFloat(e.target.value))}
           title={`Opacity: ${Math.round(layer.opacity * 100)}%`}
         />
+        {jitterEnabled && (
+          <div className="jitter-inputs">
+            <label className="jitter-label">
+              X
+              <input
+                type="number"
+                className="jitter-input"
+                min={-100}
+                max={100}
+                value={layer.jitterX}
+                onChange={(e) => onJitterChange(parseInt(e.target.value, 10) || 0, layer.jitterY)}
+              />
+            </label>
+            <label className="jitter-label">
+              Y
+              <input
+                type="number"
+                className="jitter-input"
+                min={-100}
+                max={100}
+                value={layer.jitterY}
+                onChange={(e) => onJitterChange(layer.jitterX, parseInt(e.target.value, 10) || 0)}
+              />
+            </label>
+          </div>
+        )}
       </div>
 
       {/* Color swatch + picker */}
