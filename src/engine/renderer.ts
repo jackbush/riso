@@ -7,7 +7,7 @@ const DEFAULT_HEIGHT = 600;
 
 /**
  * Compute composite canvas dimensions from the largest layer image.
- * Caps at 5000×5000. Returns 800×600 if no layers have images.
+ * Caps at 6400 per axis. Returns 800×600 if no layers have images.
  */
 export function getCompositeDimensions(layers: Layer[]): {
   width: number;

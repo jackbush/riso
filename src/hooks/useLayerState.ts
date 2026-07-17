@@ -4,6 +4,7 @@ import { Layer, InkColor } from '../types';
 import { INKS } from '../config/inks';
 
 const MAX_LAYERS = 7;
+
 function randomInk(): InkColor {
   const palette = INKS.filter((ink) => ink.name !== 'White');
   return palette[Math.floor(Math.random() * palette.length)];

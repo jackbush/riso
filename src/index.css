@@ -1,13 +1,10 @@
 :root {
-  --color-bg: #ffffff;
   --color-fg: #000000;
   --color-border: #cccccc;
   --color-accent: #1a1a1a;
   --spacing-xs: 0.2rem;
   --spacing-sm: 0.35rem;
   --spacing-md: 0.65rem;
-  --spacing-lg: 1rem;
-  --spacing-xl: 1.4rem;
   --border-radius: 4px;
   --font-family: 'Source Code Pro', monospace;
 }
@@ -335,8 +332,6 @@ button:disabled {
   color: #666;
 }
 
-
-
 .config-item--row {
   flex-direction: row;
   align-items: center;
@@ -380,7 +375,6 @@ button:disabled {
   font-size: 0.875rem;
   text-align: right;
 }
-
 
 /* Export pane */
 .export-dimensions {
