@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useLayerState } from './useLayerState';
-import { toGrayscale } from '../components/LayerTile';
+import { toGrayscale } from '../engine/grayscale';
 
 // jsdom doesn't provide ImageData — polyfill for tests
 beforeAll(() => {

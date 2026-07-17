@@ -216,12 +216,12 @@ src/
 8. [x] **2.3** ColorPicker
 9. [x] **2.4** Drag-and-drop
 10. [x] **2.5** Layer management tests
-11. [ ] **3.1** Grayscale conversion
-12. [ ] **3.2** Compositor (multiply blend)
-13. [ ] **3.3** Paper grain + texture effects
-14. [ ] **3.4** Registration marks
-15. [ ] **3.5** Render pipeline hook
-16. [ ] **3.6** Render engine tests
+11. [x] **3.1** Grayscale conversion
+12. [x] **3.2** Compositor (multiply blend)
+13. [x] **3.3** Paper grain + texture effects
+14. [x] **3.4** Registration marks
+15. [x] **3.5** Render pipeline hook
+16. [x] **3.6** Render engine tests
 17. [ ] **4.1** ConfigPanel
 18. [ ] **4.2** Download button
 19. [ ] **5.1** Centre-align layers

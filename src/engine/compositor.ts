@@ -1,0 +1,118 @@
+import { Layer, RisoConfig } from '../types';
+
+/**
+ * Parse a hex color string to [R, G, B] values (0-255).
+ */
+export function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace('#', '');
+  return [
+    parseInt(h.substring(0, 2), 16),
+    parseInt(h.substring(2, 4), 16),
+    parseInt(h.substring(4, 6), 16),
+  ];
+}
+
+/**
+ * Tint a grayscale ImageData with an ink color.
+ *
+ * Mapping:
+ *   black (0)   → full ink color (max density)
+ *   white (255) → white (no ink, transparent to multiply)
+ *   grays       → proportional blend
+ *
+ * Formula per channel: out = 255 - density * (255 - ink)
+ * where density = (255 - gray) / 255
+ */
+export function tintGrayscale(
+  grayscale: ImageData,
+  inkR: number,
+  inkG: number,
+  inkB: number,
+): ImageData {
+  const src = grayscale.data;
+  const out = new ImageData(grayscale.width, grayscale.height);
+  const dst = out.data;
+
+  // Precompute (255 - ink) to avoid repeated subtraction in the loop
+  const diffR = 255 - inkR;
+  const diffG = 255 - inkG;
+  const diffB = 255 - inkB;
+
+  for (let i = 0; i < src.length; i += 4) {
+    const gray = src[i]; // R=G=B for grayscale input
+    const density = (255 - gray) / 255;
+
+    dst[i]     = Math.round(255 - density * diffR);
+    dst[i + 1] = Math.round(255 - density * diffG);
+    dst[i + 2] = Math.round(255 - density * diffB);
+    dst[i + 3] = src[i + 3]; // preserve alpha
+  }
+
+  return out;
+}
+
+/**
+ * Composite all visible layers onto a canvas using multiply blend mode.
+ *
+ * @param layers     - Array of layers (composited bottom to top)
+ * @param config     - Riso config (paper color, jitter toggle)
+ * @param targetW    - Output canvas width (may be scaled for preview)
+ * @param targetH    - Output canvas height
+ * @param fullW      - Full-resolution composite width (for computing scale)
+ * @returns          - Canvas element with the composited result
+ */
+export function composite(
+  layers: Layer[],
+  config: RisoConfig,
+  targetW: number,
+  targetH: number,
+  fullW: number,
+): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = targetW;
+  canvas.height = targetH;
+  const ctx = canvas.getContext('2d')!;
+
+  const scale = targetW / fullW;
+
+  // 1. Paper background
+  ctx.fillStyle = config.paperColor;
+  ctx.fillRect(0, 0, targetW, targetH);
+
+  // 2. Composite each visible layer
+  for (const layer of layers) {
+    if (!layer.visible || !layer.grayscaleData) continue;
+
+    const [inkR, inkG, inkB] = hexToRgb(layer.inkColor.hex);
+    const tinted = tintGrayscale(layer.grayscaleData, inkR, inkG, inkB);
+
+    // Put tinted data onto a temp canvas at original dimensions
+    const tmp = document.createElement('canvas');
+    tmp.width = tinted.width;
+    tmp.height = tinted.height;
+    const tmpCtx = tmp.getContext('2d');
+    if (!tmpCtx) continue;
+    tmpCtx.putImageData(tinted, 0, 0);
+
+    // Compute centered position in target canvas
+    const drawW = tinted.width * scale;
+    const drawH = tinted.height * scale;
+    let drawX = (targetW - drawW) / 2;
+    let drawY = (targetH - drawH) / 2;
+
+    // Apply jitter offset (scaled)
+    if (config.jitterEnabled) {
+      drawX += layer.jitterX * scale;
+      drawY += layer.jitterY * scale;
+    }
+
+    // Draw with multiply blend
+    ctx.save();
+    ctx.globalAlpha = layer.opacity;
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+    ctx.restore();
+  }
+
+  return canvas;
+}
