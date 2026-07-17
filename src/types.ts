@@ -18,4 +18,5 @@ export interface Layer {
 export interface RisoConfig {
   jitterEnabled: boolean;
   paperColor: string;
+  safeArea: number; // pixels at full resolution
 }

@@ -11,6 +11,7 @@ export function App() {
   const [config, setConfig] = useState<RisoConfig>({
     jitterEnabled: false,
     paperColor: '#FFFDF5',
+    safeArea: 0,
   });
 
   function handleConfigChange(updates: Partial<RisoConfig>) {

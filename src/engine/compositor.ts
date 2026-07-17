@@ -68,16 +68,17 @@ export function composite(
   targetH: number,
   fullW: number,
 ): HTMLCanvasElement {
-  const canvas = document.createElement('canvas');
-  canvas.width = targetW;
-  canvas.height = targetH;
-  const ctx = canvas.getContext('2d')!;
-
   const scale = targetW / fullW;
+  const safe = Math.round((config.safeArea ?? 0) * scale);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = targetW + 2 * safe;
+  canvas.height = targetH + 2 * safe;
+  const ctx = canvas.getContext('2d')!;
 
   // 1. Paper background
   ctx.fillStyle = config.paperColor;
-  ctx.fillRect(0, 0, targetW, targetH);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // 2. Composite each visible layer
   for (const layer of layers) {
@@ -94,11 +95,11 @@ export function composite(
     if (!tmpCtx) continue;
     tmpCtx.putImageData(tinted, 0, 0);
 
-    // Compute centered position in target canvas
+    // Compute centered position within the content area, offset by safe area
     const drawW = tinted.width * scale;
     const drawH = tinted.height * scale;
-    let drawX = (targetW - drawW) / 2;
-    let drawY = (targetH - drawH) / 2;
+    let drawX = safe + (targetW - drawW) / 2;
+    let drawY = safe + (targetH - drawH) / 2;
 
     // Apply jitter offset (scaled)
     if (config.jitterEnabled) {

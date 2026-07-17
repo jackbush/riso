@@ -21,6 +21,20 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
           />
         </label>
 
+        {/* Safe area */}
+        <div className="config-item">
+          <label className="config-label">Safe area (px)</label>
+          <input
+            type="number"
+            min={0}
+            max={500}
+            step={10}
+            value={config.safeArea}
+            onChange={(e) => onChange({ safeArea: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+            className="config-hex-input"
+          />
+        </div>
+
         {/* Paper color */}
         <div className="config-item">
           <label className="config-label">Paper color</label>

@@ -52,8 +52,8 @@ export function useRenderPipeline(
 
       const result = render(currentLayers, currentConfig, scale);
 
-      canvas.width = targetW;
-      canvas.height = targetH;
+      canvas.width = result.width;
+      canvas.height = result.height;
       const ctx = canvas.getContext('2d');
       if (ctx) ctx.drawImage(result, 0, 0);
     }, DEBOUNCE_MS);
