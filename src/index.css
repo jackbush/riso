@@ -185,6 +185,10 @@ input[type='color'] {
   font-family: inherit;
 }
 
+input[type='checkbox'] {
+  accent-color: var(--color-accent);
+}
+
 button {
   padding: var(--spacing-sm) var(--spacing-md);
   background-color: var(--color-accent);
