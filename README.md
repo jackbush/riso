@@ -19,7 +19,7 @@ This emulator simulates that process so you can experiment freely: separate your
 1. **Drag an image (or PDF) anywhere onto the page.** Each image becomes a layer; each PDF page becomes its own layer. Or click **Add layers**.
 2. **Click a layer's color swatch** and pick an ink. The palette is ~30 real Riso inks with accurate hex values — Fluorescent Pink and Blue is a classic first combo.
 3. **Play with the toggles** in the settings panel until it feels like a print, not a screen.
-4. **Download PNG** exports at full resolution.
+4. Hit **Download** (bottom-left, next to the zoom controls — it shows the exact pixel size) to export a full-resolution PNG.
 
 Every layer is converted to grayscale on import — dark areas become heavy ink, light areas become bare paper. That's exactly how a real riso "sees" your artwork, one color separation at a time. Up to 7 layers (a real print shop would charge you dearly for 7 passes).
 

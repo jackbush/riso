@@ -117,14 +117,24 @@ body {
   will-change: transform, opacity;
 }
 
-.zoom-controls {
+.floating-controls {
   position: fixed;
   left: var(--spacing-md);
   bottom: var(--spacing-md);
   z-index: 20;
   display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.zoom-controls,
+.download-btn {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   border-radius: var(--border-radius);
+}
+
+.zoom-controls {
+  display: flex;
 }
 
 .zoom-btn {
@@ -137,13 +147,22 @@ body {
   cursor: pointer;
 }
 
-.zoom-btn:first-child {
+.zoom-controls .zoom-btn:first-child {
   border-radius: var(--border-radius) 0 0 var(--border-radius);
 }
 
-.zoom-btn:last-child {
+.zoom-controls .zoom-btn:last-child {
   border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+/* Collapse the shared border between adjacent group members only, so a
+   standalone .zoom-btn (the download button) keeps all four borders */
+.zoom-btn + .zoom-btn {
   border-left: none;
+}
+
+.download-btn {
+  border-radius: var(--border-radius);
 }
 
 .zoom-btn--active {
@@ -519,18 +538,6 @@ button:disabled {
   font-family: inherit;
   font-size: 0.875rem;
   text-align: right;
-}
-
-/* Export pane */
-.export-dimensions {
-  margin: 0;
-  font-size: 0.875rem;
-  color: #666;
-  font-variant-numeric: tabular-nums;
-}
-
-.export-btn {
-  width: 100%;
 }
 
 /* Preview pane empty state */

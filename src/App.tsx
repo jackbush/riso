@@ -92,13 +92,13 @@ export function App() {
         config={config}
         zoomMode={zoomMode}
         onZoomModeChange={setZoomMode}
+        onExport={() => exportFullRes(layers, config)}
       />
       <SettingsPanel
         layers={layers}
         actions={actions}
         config={config}
         onConfigChange={handleConfigChange}
-        onExport={() => exportFullRes(layers, config)}
       />
     </div>
   );

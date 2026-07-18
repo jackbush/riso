@@ -8,6 +8,7 @@ interface PreviewPaneProps {
   config: RisoConfig;
   zoomMode: ZoomMode;
   onZoomModeChange: (mode: ZoomMode) => void;
+  onExport: () => void;
 }
 
 // Pointer movement below this (CSS px) counts as a click, above it as a pan.
@@ -28,7 +29,13 @@ interface PendingTransition {
   fromRect: DOMRect;
 }
 
-export function PreviewPane({ layers, config, zoomMode, onZoomModeChange }: PreviewPaneProps) {
+export function PreviewPane({
+  layers,
+  config,
+  zoomMode,
+  onZoomModeChange,
+  onExport,
+}: PreviewPaneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dragRef = useRef<DragState | null>(null);
@@ -37,6 +44,9 @@ export function PreviewPane({ layers, config, zoomMode, onZoomModeChange }: Prev
   const [canvasReady, setCanvasReady] = useState(false);
 
   const isEmpty = !layers.some((l) => l.grayscaleData);
+  const { width: compositeW, height: compositeH } = getCompositeDimensions(layers);
+  const exportW = compositeW + 2 * (config.safeArea ?? 0);
+  const exportH = compositeH + 2 * (config.safeArea ?? 0);
 
   const clearOverlay = useCallback(() => {
     overlayRef.current?.remove();
@@ -222,20 +232,25 @@ export function PreviewPane({ layers, config, zoomMode, onZoomModeChange }: Prev
         onPointerUp={handlePointerUp}
       />
       {canvasReady && (
-        <div className="zoom-controls">
-          <button
-            type="button"
-            className={`zoom-btn${zoomMode === 'fit' ? ' zoom-btn--active' : ''}`}
-            onClick={() => requestZoom('fit')}
-          >
-            Fit
-          </button>
-          <button
-            type="button"
-            className={`zoom-btn${zoomMode === 'full' ? ' zoom-btn--active' : ''}`}
-            onClick={() => requestZoom('full')}
-          >
-            100%
+        <div className="floating-controls">
+          <div className="zoom-controls">
+            <button
+              type="button"
+              className={`zoom-btn${zoomMode === 'fit' ? ' zoom-btn--active' : ''}`}
+              onClick={() => requestZoom('fit')}
+            >
+              Fit
+            </button>
+            <button
+              type="button"
+              className={`zoom-btn${zoomMode === 'full' ? ' zoom-btn--active' : ''}`}
+              onClick={() => requestZoom('full')}
+            >
+              100%
+            </button>
+          </div>
+          <button type="button" className="zoom-btn download-btn" onClick={onExport}>
+            Download ({exportW}×{exportH}px)
           </button>
         </div>
       )}
