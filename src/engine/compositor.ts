@@ -52,6 +52,36 @@ export function tintGrayscale(
 }
 
 /**
+ * Tint a grayscale ImageData with an ink color as a density-alpha mask:
+ * RGB is the flat ink color, alpha is proportional to density (black → opaque
+ * ink, white → fully transparent). Used for the source-over "opaque overprint"
+ * component of ink transparency blending, as opposed to `tintGrayscale`'s
+ * multiply-ready output (which encodes density via lightness, not alpha).
+ */
+export function tintGrayscaleAlpha(
+  grayscale: ImageData,
+  inkR: number,
+  inkG: number,
+  inkB: number,
+): ImageData {
+  const src = grayscale.data;
+  const out = new ImageData(grayscale.width, grayscale.height);
+  const dst = out.data;
+
+  for (let i = 0; i < src.length; i += 4) {
+    const gray = src[i];
+    const density = (255 - gray) / 255;
+
+    dst[i] = inkR;
+    dst[i + 1] = inkG;
+    dst[i + 2] = inkB;
+    dst[i + 3] = Math.round(density * src[i + 3]);
+  }
+
+  return out;
+}
+
+/**
  * Composite all visible layers onto a canvas using multiply blend mode.
  *
  * @param layers     - Array of layers (composited bottom to top)
@@ -107,11 +137,38 @@ export function composite(
       drawY += layer.offsetY * scale;
     }
 
-    // Draw with multiply blend
     ctx.save();
-    ctx.globalAlpha = layer.opacity;
-    ctx.globalCompositeOperation = 'multiply';
-    ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+
+    if (config.inkTransparencyEnabled) {
+      // Blend between pure multiply (transparent, dye-like inks — shows what's
+      // beneath) and source-over occlusion by density (opaque inks — hides it).
+      const transparency = layer.inkColor.transparency;
+
+      if (transparency > 0) {
+        ctx.globalAlpha = layer.opacity * transparency;
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+      }
+
+      if (transparency < 1) {
+        const alphaTinted = tintGrayscaleAlpha(layer.grayscaleData, inkR, inkG, inkB);
+        const tmpAlpha = document.createElement('canvas');
+        tmpAlpha.width = alphaTinted.width;
+        tmpAlpha.height = alphaTinted.height;
+        const tmpAlphaCtx = tmpAlpha.getContext('2d');
+        if (tmpAlphaCtx) {
+          tmpAlphaCtx.putImageData(alphaTinted, 0, 0);
+          ctx.globalAlpha = layer.opacity * (1 - transparency);
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.drawImage(tmpAlpha, drawX, drawY, drawW, drawH);
+        }
+      }
+    } else {
+      ctx.globalAlpha = layer.opacity;
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.drawImage(tmp, drawX, drawY, drawW, drawH);
+    }
+
     ctx.restore();
   }
 

@@ -86,6 +86,16 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
           onChange={(e) => onChange({ offsetEnabled: e.target.checked })}
         />
       </label>
+
+      {/* Ink transparency */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Ink transparency</span>
+        <input
+          type="checkbox"
+          checked={config.inkTransparencyEnabled}
+          onChange={(e) => onChange({ inkTransparencyEnabled: e.target.checked })}
+        />
+      </label>
     </>
   );
 }

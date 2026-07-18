@@ -76,7 +76,7 @@ describe('Color change smoke', () => {
 
     const [l0, l1] = result.current.layers;
     const originalL1Color = l1.inkColor;
-    const newColor = { name: 'Red', hex: '#FF0000' };
+    const newColor = { name: 'Red', hex: '#FF0000', transparency: 0.5 };
 
     act(() => result.current.updateLayerColor(l0.id, newColor));
 

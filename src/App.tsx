@@ -16,6 +16,7 @@ export function App() {
   const [config, setConfig] = useState<RisoConfig>({
     offsetEnabled: false,
     opacityEnabled: false,
+    inkTransparencyEnabled: false,
     paperColor: '#FFFDF5',
     safeArea: 0,
   });

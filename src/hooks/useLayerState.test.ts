@@ -85,10 +85,10 @@ describe('useLayerState', () => {
     });
     const [layer0, layer1] = result.current.layers;
     // Pin layer[1] to a known different color first
-    const blueColor = { name: 'Blue', hex: '#0000FF' };
+    const blueColor = { name: 'Blue', hex: '#0000FF', transparency: 0.5 };
     act(() => { result.current.updateLayerColor(layer1.id, blueColor); });
     // Now set layer[0] to Red
-    const redColor = { name: 'Red', hex: '#FF0000' };
+    const redColor = { name: 'Red', hex: '#FF0000', transparency: 0.5 };
     act(() => { result.current.updateLayerColor(layer0.id, redColor); });
     expect(result.current.layers[0].inkColor).toEqual(redColor);
     expect(result.current.layers[1].inkColor).toEqual(blueColor);

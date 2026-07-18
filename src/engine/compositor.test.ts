@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { hexToRgb, tintGrayscale } from './compositor';
+import { hexToRgb, tintGrayscale, tintGrayscaleAlpha } from './compositor';
 import { getCompositeDimensions } from './renderer';
 import { Layer } from '../types';
 
@@ -25,7 +25,7 @@ function makeLayer(overrides: Partial<Layer> = {}): Layer {
     name: 'Test',
     imageData: null,
     grayscaleData: null,
-    inkColor: { name: 'Black', hex: '#000000' },
+    inkColor: { name: 'Black', hex: '#000000', transparency: 0.15 },
     opacity: 1,
     offsetX: 0,
     offsetY: 0,
@@ -134,6 +134,38 @@ describe('tintGrayscale', () => {
     expect(out.data[4]).toBe(255);
     expect(out.data[5]).toBe(255);
     expect(out.data[6]).toBe(255);
+  });
+});
+
+// ------- tintGrayscaleAlpha -------
+
+describe('tintGrayscaleAlpha', () => {
+  it('black pixel → opaque ink color', () => {
+    const gray = makeImageData(1, 1, 0, 0, 0);
+    const out = tintGrayscaleAlpha(gray, 255, 0, 0);
+    expect(out.data[0]).toBe(255);
+    expect(out.data[1]).toBe(0);
+    expect(out.data[2]).toBe(0);
+    expect(out.data[3]).toBe(255); // full density → full alpha
+  });
+
+  it('white pixel → fully transparent', () => {
+    const gray = makeImageData(1, 1, 255, 255, 255);
+    const out = tintGrayscaleAlpha(gray, 255, 0, 0);
+    expect(out.data[3]).toBe(0); // no density → no alpha, regardless of RGB
+  });
+
+  it('mid-gray produces proportional alpha', () => {
+    const gray = makeImageData(1, 1, 128, 128, 128);
+    const out = tintGrayscaleAlpha(gray, 0, 120, 191);
+    const density = (255 - 128) / 255;
+    expect(out.data[3]).toBe(Math.round(density * 255));
+  });
+
+  it('scales alpha by source alpha', () => {
+    const gray = makeImageData(1, 1, 0, 0, 0, 100); // full density, half-ish source alpha
+    const out = tintGrayscaleAlpha(gray, 255, 0, 0);
+    expect(out.data[3]).toBe(100); // density=1 → alpha = 1 * 100
   });
 });
 
