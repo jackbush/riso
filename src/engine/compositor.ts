@@ -1,6 +1,7 @@
 import { Layer, RisoConfig } from '../types';
 import { densityBoxBlur } from './blur';
 import { applyAMHalftone, applyStochasticHalftone, autoScreenAngle } from './halftone';
+import { KMLayer, kmMixPixels, ksFromHex, orderWeight } from './kubelkaMunk';
 import { computeRegistrationJitter } from './prng';
 
 /**
@@ -167,8 +168,78 @@ function computeDensity(
   return density;
 }
 
+interface LayerPlacement {
+  drawX: number;
+  drawY: number;
+  drawW: number;
+  drawH: number;
+  rotationDeg: number;
+}
+
 /**
- * Composite all visible layers onto a canvas using multiply blend mode.
+ * Where a layer's (density-sized) image lands on the output canvas: centered
+ * in the content area, pushed by the safe-area margin, then shifted by the
+ * layer offset and registration jitter (all scaled). Shared by the multiply
+ * and Kubelka-Munk paths so both apply identical geometry.
+ */
+function computeLayerPlacement(
+  layer: Layer,
+  config: RisoConfig,
+  srcW: number,
+  srcH: number,
+  scale: number,
+  targetW: number,
+  targetH: number,
+  safe: number,
+): LayerPlacement {
+  const drawW = srcW * scale;
+  const drawH = srcH * scale;
+  let drawX = safe + (targetW - drawW) / 2;
+  let drawY = safe + (targetH - drawH) / 2;
+
+  if (config.offsetEnabled) {
+    drawX += layer.offsetX * scale;
+    drawY += layer.offsetY * scale;
+  }
+
+  // Registration jitter (scaled): random per-layer shift, keyed by layer id
+  // + seed so it's stable across re-renders and only changes on an explicit
+  // re-roll (or a slider change).
+  let rotationDeg = 0;
+  if (config.registrationJitterEnabled) {
+    const jitter = computeRegistrationJitter(
+      config.registrationJitterSeed,
+      config.registrationJitterAmount,
+      layer.id,
+    );
+    drawX += jitter.dx * scale;
+    drawY += jitter.dy * scale;
+    rotationDeg = jitter.rotationDeg;
+  }
+
+  return { drawX, drawY, drawW, drawH, rotationDeg };
+}
+
+function applyPlacementRotation(ctx: CanvasRenderingContext2D, p: LayerPlacement): void {
+  if (p.rotationDeg === 0) return;
+  const centerX = p.drawX + p.drawW / 2;
+  const centerY = p.drawY + p.drawH / 2;
+  ctx.translate(centerX, centerY);
+  ctx.rotate((p.rotationDeg * Math.PI) / 180);
+  ctx.translate(-centerX, -centerY);
+}
+
+function imageDataToCanvas(img: ImageData): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = img.width;
+  canvas.height = img.height;
+  canvas.getContext('2d')!.putImageData(img, 0, 0);
+  return canvas;
+}
+
+/**
+ * Composite all visible layers onto a canvas — multiply blend mode, or
+ * Kubelka-Munk mixing when enabled (see kmComposite).
  *
  * @param layers     - Array of layers (composited bottom to top)
  * @param config     - Riso config (paper color, offset toggle)
@@ -184,6 +255,10 @@ export function composite(
   targetH: number,
   fullW: number,
 ): HTMLCanvasElement {
+  if (config.kubelkaMunkEnabled) {
+    return kmComposite(layers, config, targetW, targetH, fullW);
+  }
+
   const scale = targetW / fullW;
   const safe = Math.round((config.safeArea ?? 0) * scale);
 
@@ -206,51 +281,22 @@ export function composite(
     const [inkR, inkG, inkB] = hexToRgb(layer.inkColor.hex);
     const density = computeDensity(layer.grayscaleData, config, layerIndex);
     const tinted = tintGrayscale(density, inkR, inkG, inkB);
+    const tmp = imageDataToCanvas(tinted);
 
-    // Put tinted data onto a temp canvas at original dimensions
-    const tmp = document.createElement('canvas');
-    tmp.width = tinted.width;
-    tmp.height = tinted.height;
-    const tmpCtx = tmp.getContext('2d');
-    if (!tmpCtx) continue;
-    tmpCtx.putImageData(tinted, 0, 0);
-
-    // Compute centered position within the content area, offset by safe area
-    const drawW = tinted.width * scale;
-    const drawH = tinted.height * scale;
-    let drawX = safe + (targetW - drawW) / 2;
-    let drawY = safe + (targetH - drawH) / 2;
-
-    // Apply offset (scaled)
-    if (config.offsetEnabled) {
-      drawX += layer.offsetX * scale;
-      drawY += layer.offsetY * scale;
-    }
-
-    // Apply registration jitter (scaled): random per-layer shift, keyed by
-    // layer id + seed so it's stable across re-renders and only changes on
-    // an explicit re-roll (or a slider change).
-    let jitterRotationDeg = 0;
-    if (config.registrationJitterEnabled) {
-      const jitter = computeRegistrationJitter(
-        config.registrationJitterSeed,
-        config.registrationJitterAmount,
-        layer.id,
-      );
-      drawX += jitter.dx * scale;
-      drawY += jitter.dy * scale;
-      jitterRotationDeg = jitter.rotationDeg;
-    }
+    const placement = computeLayerPlacement(
+      layer,
+      config,
+      tinted.width,
+      tinted.height,
+      scale,
+      targetW,
+      targetH,
+      safe,
+    );
+    const { drawX, drawY, drawW, drawH } = placement;
 
     ctx.save();
-
-    if (jitterRotationDeg !== 0) {
-      const centerX = drawX + drawW / 2;
-      const centerY = drawY + drawH / 2;
-      ctx.translate(centerX, centerY);
-      ctx.rotate((jitterRotationDeg * Math.PI) / 180);
-      ctx.translate(-centerX, -centerY);
-    }
+    applyPlacementRotation(ctx, placement);
 
     if (config.inkTransparencyEnabled) {
       // Blend between pure multiply (transparent, dye-like inks — shows what's
@@ -283,6 +329,96 @@ export function composite(
     }
 
     ctx.restore();
+  }
+
+  return canvas;
+}
+
+// Strip height for Kubelka-Munk mixing: bounds JS-heap ImageData copies to
+// (layers + 1) × width × 256 RGBA pixels instead of full-frame buffers,
+// which at the 6400px export cap would otherwise run to hundreds of MB.
+const KM_STRIP_ROWS = 256;
+
+/**
+ * Kubelka-Munk compositing path: replaces multiply blending entirely (ink
+ * transparency blending is likewise superseded — KM is the blending model).
+ *
+ * Geometry is not reimplemented in software: each layer's density map is
+ * rasterized by Canvas onto a white, output-sized buffer with the exact same
+ * placement (resampling, centering, safe area, offsets, jitter + rotation) as
+ * the multiply path. Opacity uses globalAlpha, which over a white background
+ * scales density exactly: 255 − (a·src + (1−a)·255) = a·(255 − src). The
+ * per-pixel KM math then runs on aligned buffers in row strips.
+ */
+function kmComposite(
+  layers: Layer[],
+  config: RisoConfig,
+  targetW: number,
+  targetH: number,
+  fullW: number,
+): HTMLCanvasElement {
+  const scale = targetW / fullW;
+  const safe = Math.round((config.safeArea ?? 0) * scale);
+  const width = targetW + 2 * safe;
+  const height = targetH + 2 * safe;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d')!;
+
+  const visibleIndices: number[] = [];
+  for (let i = 0; i < layers.length; i++) {
+    if (layers[i].visible && layers[i].grayscaleData) visibleIndices.push(i);
+  }
+
+  const rasterized = visibleIndices.map((layerIndex, position) => {
+    const layer = layers[layerIndex];
+    const density = computeDensity(layer.grayscaleData!, config, layerIndex);
+    const tmp = imageDataToCanvas(density);
+
+    const target = document.createElement('canvas');
+    target.width = width;
+    target.height = height;
+    const targetCtx = target.getContext('2d')!;
+    targetCtx.fillStyle = '#FFFFFF';
+    targetCtx.fillRect(0, 0, width, height);
+
+    const placement = computeLayerPlacement(
+      layer,
+      config,
+      density.width,
+      density.height,
+      scale,
+      targetW,
+      targetH,
+      safe,
+    );
+    targetCtx.save();
+    applyPlacementRotation(targetCtx, placement);
+    targetCtx.globalAlpha = layer.opacity;
+    targetCtx.drawImage(tmp, placement.drawX, placement.drawY, placement.drawW, placement.drawH);
+    targetCtx.restore();
+
+    return {
+      ctx: targetCtx,
+      ks: ksFromHex(layer.inkColor.hex),
+      weight: orderWeight(position, visibleIndices.length, config.kubelkaMunkOrderBias),
+    };
+  });
+
+  const paperKS = ksFromHex(config.paperColor);
+
+  for (let y0 = 0; y0 < height; y0 += KM_STRIP_ROWS) {
+    const rows = Math.min(KM_STRIP_ROWS, height - y0);
+    const strips: KMLayer[] = rasterized.map((r) => ({
+      data: r.ctx.getImageData(0, y0, width, rows).data,
+      ks: r.ks,
+      weight: r.weight,
+    }));
+    const out = ctx.createImageData(width, rows);
+    kmMixPixels(strips, paperKS, out.data);
+    ctx.putImageData(out, 0, y0);
   }
 
   return canvas;

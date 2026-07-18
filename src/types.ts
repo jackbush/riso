@@ -30,6 +30,8 @@ export interface RisoConfig {
   halftoneScale: number; // stochastic grain size, 1-6px at full resolution
   halftoneSpacing: number; // AM dot pitch, 4-40px at full resolution
   halftoneAngle: number | null; // AM screen angle in degrees; null = auto per-layer
+  kubelkaMunkEnabled: boolean; // replaces multiply blending entirely when on
+  kubelkaMunkOrderBias: number; // 0-1; extra K/S weight for bottom layers
   paperColor: string;
   safeArea: number; // pixels at full resolution
 }

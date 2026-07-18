@@ -189,6 +189,37 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         </div>
       )}
 
+      {/* Kubelka-Munk mixing */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Kubelka-Munk mixing</span>
+        <input
+          type="checkbox"
+          checked={config.kubelkaMunkEnabled}
+          onChange={(e) => onChange({ kubelkaMunkEnabled: e.target.checked })}
+        />
+      </label>
+      {config.kubelkaMunkEnabled && (
+        <>
+          <label className="config-item config-item--row">
+            <span className="config-label">Order bias</span>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.1}
+              value={config.kubelkaMunkOrderBias}
+              onChange={(e) => onChange({ kubelkaMunkOrderBias: parseFloat(e.target.value) })}
+            />
+          </label>
+          {config.inkTransparencyEnabled && (
+            <div className="config-item config-hint">
+              Kubelka-Munk replaces multiply blending — the ink transparency
+              setting has no effect while it's on.
+            </div>
+          )}
+        </>
+      )}
+
       {/* Registration jitter */}
       <label className="config-item config-item--row">
         <span className="config-label">Registration jitter</span>

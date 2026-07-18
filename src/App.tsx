@@ -26,6 +26,8 @@ export function App() {
     halftoneScale: 2,
     halftoneSpacing: 8,
     halftoneAngle: null,
+    kubelkaMunkEnabled: false,
+    kubelkaMunkOrderBias: 0.3,
     paperColor: '#FFFDF5',
     safeArea: 0,
   });
