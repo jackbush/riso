@@ -1,4 +1,5 @@
 import { Layer, RisoConfig } from '../types';
+import { densityBoxBlur } from './blur';
 
 /**
  * Parse a hex color string to [R, G, B] values (0-255).
@@ -81,6 +82,49 @@ export function tintGrayscaleAlpha(
   return out;
 }
 
+// Per-layer cache of spread-blurred density, keyed by blur radius, so the
+// debounced re-render triggered by unrelated config changes (or resizing the
+// preview) doesn't re-blur a full-resolution image every time.
+const spreadCache = new WeakMap<ImageData, Map<number, ImageData>>();
+
+function applySpreadStage(grayscaleData: ImageData, config: RisoConfig): ImageData {
+  if (!config.inkSpreadEnabled) return grayscaleData;
+
+  const radius = Math.round(config.inkSpreadAmount);
+  if (radius <= 0) return grayscaleData;
+
+  let byRadius = spreadCache.get(grayscaleData);
+  if (!byRadius) {
+    byRadius = new Map();
+    spreadCache.set(grayscaleData, byRadius);
+  }
+
+  let blurred = byRadius.get(radius);
+  if (!blurred) {
+    blurred = densityBoxBlur(grayscaleData, radius);
+    byRadius.set(radius, blurred);
+  }
+  return blurred;
+}
+
+function applyHalftoneStage(density: ImageData, _config: RisoConfig): ImageData {
+  // Phase 4 will slot stochastic/AM halftone thresholding in here. No-op for now.
+  return density;
+}
+
+/**
+ * Density pipeline: grayscale → spread → halftone → (tint happens separately).
+ * Each stage is a pure function over density `ImageData` that no-ops when its
+ * feature is disabled, so later phases (halftone, Kubelka-Munk) slot in as
+ * additional stages instead of branching inside `composite()`.
+ */
+function computeDensity(grayscaleData: ImageData, config: RisoConfig): ImageData {
+  let density = grayscaleData;
+  density = applySpreadStage(density, config);
+  density = applyHalftoneStage(density, config);
+  return density;
+}
+
 /**
  * Composite all visible layers onto a canvas using multiply blend mode.
  *
@@ -115,7 +159,8 @@ export function composite(
     if (!layer.visible || !layer.grayscaleData) continue;
 
     const [inkR, inkG, inkB] = hexToRgb(layer.inkColor.hex);
-    const tinted = tintGrayscale(layer.grayscaleData, inkR, inkG, inkB);
+    const density = computeDensity(layer.grayscaleData, config);
+    const tinted = tintGrayscale(density, inkR, inkG, inkB);
 
     // Put tinted data onto a temp canvas at original dimensions
     const tmp = document.createElement('canvas');
@@ -151,7 +196,7 @@ export function composite(
       }
 
       if (transparency < 1) {
-        const alphaTinted = tintGrayscaleAlpha(layer.grayscaleData, inkR, inkG, inkB);
+        const alphaTinted = tintGrayscaleAlpha(density, inkR, inkG, inkB);
         const tmpAlpha = document.createElement('canvas');
         tmpAlpha.width = alphaTinted.width;
         tmpAlpha.height = alphaTinted.height;

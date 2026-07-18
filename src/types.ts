@@ -21,6 +21,8 @@ export interface RisoConfig {
   offsetEnabled: boolean;
   opacityEnabled: boolean;
   inkTransparencyEnabled: boolean;
+  inkSpreadEnabled: boolean;
+  inkSpreadAmount: number; // 0-5px at full resolution
   paperColor: string;
   safeArea: number; // pixels at full resolution
 }

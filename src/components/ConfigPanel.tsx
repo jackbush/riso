@@ -96,6 +96,29 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
           onChange={(e) => onChange({ inkTransparencyEnabled: e.target.checked })}
         />
       </label>
+
+      {/* Ink spread */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Ink spread</span>
+        <input
+          type="checkbox"
+          checked={config.inkSpreadEnabled}
+          onChange={(e) => onChange({ inkSpreadEnabled: e.target.checked })}
+        />
+      </label>
+      {config.inkSpreadEnabled && (
+        <label className="config-item config-item--row">
+          <span className="config-label">Spread amount (px)</span>
+          <input
+            type="range"
+            min={0}
+            max={5}
+            step={0.5}
+            value={config.inkSpreadAmount}
+            onChange={(e) => onChange({ inkSpreadAmount: parseFloat(e.target.value) })}
+          />
+        </label>
+      )}
     </>
   );
 }

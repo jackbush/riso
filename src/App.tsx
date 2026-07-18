@@ -17,6 +17,8 @@ export function App() {
     offsetEnabled: false,
     opacityEnabled: false,
     inkTransparencyEnabled: false,
+    inkSpreadEnabled: false,
+    inkSpreadAmount: 1.5,
     paperColor: '#FFFDF5',
     safeArea: 0,
   });
