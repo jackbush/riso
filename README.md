@@ -49,7 +49,7 @@ upload → toGrayscale ─→ spread (blur.ts) ─→ halftone (halftone.ts) ─
                                                                       └─ Kubelka-Munk path (kubelkaMunk.ts)
 ```
 
-#### Things worth knowing
+### Things worth knowing
 
 - **Everything is full-resolution pixels, no DPI anywhere.** Effects run on full-res data *before* the preview downscale — never scale an effect radius by render scale, that double-applies it.
 - **Randomness is always seeded**, keyed by layer id (not index, so reordering doesn't reshuffle jitter). The export reuses the preview's seed and matches it exactly.
