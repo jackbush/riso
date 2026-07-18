@@ -249,6 +249,12 @@ body {
   font-weight: 500;
 }
 
+.config-hint {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  font-style: italic;
+}
+
 input[type='range'],
 input[type='text'],
 input[type='color'] {

@@ -22,6 +22,10 @@ export function App() {
     registrationJitterEnabled: false,
     registrationJitterAmount: 2,
     registrationJitterSeed: 1,
+    halftoneMode: 'off',
+    halftoneScale: 2,
+    halftoneSpacing: 8,
+    halftoneAngle: null,
     paperColor: '#FFFDF5',
     safeArea: 0,
   });

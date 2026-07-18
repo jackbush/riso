@@ -1,5 +1,6 @@
 import { Layer, RisoConfig } from '../types';
 import { densityBoxBlur } from './blur';
+import { applyAMHalftone, applyStochasticHalftone, autoScreenAngle } from './halftone';
 import { computeRegistrationJitter } from './prng';
 
 /**
@@ -108,21 +109,61 @@ function applySpreadStage(grayscaleData: ImageData, config: RisoConfig): ImageDa
   return blurred;
 }
 
-function applyHalftoneStage(density: ImageData, _config: RisoConfig): ImageData {
-  // Phase 4 will slot stochastic/AM halftone thresholding in here. No-op for now.
-  return density;
+// Per-layer cache of halftoned density, keyed by the resolved screen params,
+// for the same reason as the spread cache: thresholding a full-resolution
+// image on every debounced re-render is wasteful. Keyed off the *input*
+// density object, so it chains correctly after the (cached) spread stage.
+const halftoneCache = new WeakMap<ImageData, Map<string, ImageData>>();
+
+function applyHalftoneStage(
+  density: ImageData,
+  config: RisoConfig,
+  layerIndex: number,
+): ImageData {
+  if (config.halftoneMode === 'off') return density;
+
+  let key: string;
+  let compute: () => ImageData;
+  if (config.halftoneMode === 'stochastic') {
+    const scale = config.halftoneScale;
+    key = `s:${scale}`;
+    compute = () => applyStochasticHalftone(density, scale);
+  } else {
+    const angle = config.halftoneAngle ?? autoScreenAngle(layerIndex);
+    const spacing = config.halftoneSpacing;
+    key = `am:${spacing}:${angle}`;
+    compute = () => applyAMHalftone(density, spacing, angle);
+  }
+
+  let byKey = halftoneCache.get(density);
+  if (!byKey) {
+    byKey = new Map();
+    halftoneCache.set(density, byKey);
+  }
+
+  let result = byKey.get(key);
+  if (!result) {
+    result = compute();
+    byKey.set(key, result);
+  }
+  return result;
 }
 
 /**
  * Density pipeline: grayscale → spread → halftone → (tint happens separately).
  * Each stage is a pure function over density `ImageData` that no-ops when its
- * feature is disabled, so later phases (halftone, Kubelka-Munk) slot in as
- * additional stages instead of branching inside `composite()`.
+ * feature is disabled, so later phases (Kubelka-Munk) slot in as additional
+ * stages instead of branching inside `composite()`. `layerIndex` picks the
+ * auto screen angle for AM halftone.
  */
-function computeDensity(grayscaleData: ImageData, config: RisoConfig): ImageData {
+function computeDensity(
+  grayscaleData: ImageData,
+  config: RisoConfig,
+  layerIndex: number,
+): ImageData {
   let density = grayscaleData;
   density = applySpreadStage(density, config);
-  density = applyHalftoneStage(density, config);
+  density = applyHalftoneStage(density, config, layerIndex);
   return density;
 }
 
@@ -155,12 +196,15 @@ export function composite(
   ctx.fillStyle = config.paperColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // 2. Composite each visible layer
-  for (const layer of layers) {
+  // 2. Composite each visible layer. The index (position in the full layer
+  // list, not just visible ones) keys the auto AM screen angle, so toggling
+  // a layer's visibility doesn't reshuffle the other layers' angles.
+  for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+    const layer = layers[layerIndex];
     if (!layer.visible || !layer.grayscaleData) continue;
 
     const [inkR, inkG, inkB] = hexToRgb(layer.inkColor.hex);
-    const density = computeDensity(layer.grayscaleData, config);
+    const density = computeDensity(layer.grayscaleData, config, layerIndex);
     const tinted = tintGrayscale(density, inkR, inkG, inkB);
 
     // Put tinted data onto a temp canvas at original dimensions

@@ -26,6 +26,10 @@ export interface RisoConfig {
   registrationJitterEnabled: boolean;
   registrationJitterAmount: number; // 0-10px at full resolution
   registrationJitterSeed: number;
+  halftoneMode: 'off' | 'stochastic' | 'am';
+  halftoneScale: number; // stochastic grain size, 1-6px at full resolution
+  halftoneSpacing: number; // AM dot pitch, 4-40px at full resolution
+  halftoneAngle: number | null; // AM screen angle in degrees; null = auto per-layer
   paperColor: string;
   safeArea: number; // pixels at full resolution
 }
