@@ -262,6 +262,30 @@ function applyPlacementRotation(ctx: CanvasRenderingContext2D, p: LayerPlacement
   ctx.translate(-centerX, -centerY);
 }
 
+/**
+ * Prepare a layer image for drawing at `effectiveScale`. Canvas bilinear
+ * filtering samples only a 2×2 tap, so a single drawImage below half size
+ * skips source pixels — and skipping through a binary halftone stipple
+ * aliases into strong moiré that varies with the fit-preview scale. Halve the
+ * canvas (a proper 2×2 average each step) until the remaining draw scale is
+ * ≥ 0.5, so the final drawImage filters every source pixel. No-op at scale
+ * ≥ 0.5, so 100% view and export are untouched.
+ */
+function prefilterForScale(img: ImageData, effectiveScale: number): HTMLCanvasElement {
+  let canvas = imageDataToCanvas(img);
+  for (let s = effectiveScale; s < 0.5; s *= 2) {
+    const half = document.createElement('canvas');
+    half.width = Math.max(1, Math.ceil(canvas.width / 2));
+    half.height = Math.max(1, Math.ceil(canvas.height / 2));
+    const hctx = half.getContext('2d')!;
+    hctx.imageSmoothingEnabled = true;
+    hctx.imageSmoothingQuality = 'high';
+    hctx.drawImage(canvas, 0, 0, half.width, half.height);
+    canvas = half;
+  }
+  return canvas;
+}
+
 function imageDataToCanvas(img: ImageData): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = img.width;
@@ -317,7 +341,6 @@ export function composite(
     const [inkR, inkG, inkB] = hexToRgb(layer.inkColor.hex);
     const density = computeDensity(layer.grayscaleData, config, layerIndex);
     const tinted = tintGrayscale(density, inkR, inkG, inkB);
-    const tmp = imageDataToCanvas(tinted);
 
     const placement = computeLayerPlacement(
       layer,
@@ -330,10 +353,13 @@ export function composite(
       margin,
     );
     const { drawX, drawY, drawW, drawH } = placement;
+    const effScale = drawW / tinted.width;
+    const tmp = prefilterForScale(tinted, effScale);
 
     ctx.save();
     applyPlacementRotation(ctx, placement);
-    ctx.imageSmoothingEnabled = !crispHalftone(config, placement.drawW / tinted.width);
+    ctx.imageSmoothingEnabled = !crispHalftone(config, effScale);
+    ctx.imageSmoothingQuality = 'high';
 
     if (config.inkBlendMode === 'simple') {
       // Blend between pure multiply (transparent, dye-like inks — shows what's
@@ -348,16 +374,10 @@ export function composite(
 
       if (transparency < 1) {
         const alphaTinted = tintGrayscaleAlpha(density, inkR, inkG, inkB);
-        const tmpAlpha = document.createElement('canvas');
-        tmpAlpha.width = alphaTinted.width;
-        tmpAlpha.height = alphaTinted.height;
-        const tmpAlphaCtx = tmpAlpha.getContext('2d');
-        if (tmpAlphaCtx) {
-          tmpAlphaCtx.putImageData(alphaTinted, 0, 0);
-          ctx.globalAlpha = layer.opacity * (1 - transparency);
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.drawImage(tmpAlpha, drawX, drawY, drawW, drawH);
-        }
+        const tmpAlpha = prefilterForScale(alphaTinted, effScale);
+        ctx.globalAlpha = layer.opacity * (1 - transparency);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.drawImage(tmpAlpha, drawX, drawY, drawW, drawH);
       }
     } else {
       ctx.globalAlpha = layer.opacity;
@@ -412,7 +432,6 @@ function kmComposite(
   const rasterized = visibleIndices.map((layerIndex, position) => {
     const layer = layers[layerIndex];
     const density = computeDensity(layer.grayscaleData!, config, layerIndex);
-    const tmp = imageDataToCanvas(density);
 
     const target = document.createElement('canvas');
     target.width = width;
@@ -431,11 +450,15 @@ function kmComposite(
       targetH,
       margin,
     );
+    const effScale = placement.drawW / density.width;
+    const tmp = prefilterForScale(density, effScale);
+
     targetCtx.save();
     // Outside the clip the buffer stays white = zero density = no ink
     applySafeAreaClip(targetCtx, config, scale, width, height);
     applyPlacementRotation(targetCtx, placement);
-    targetCtx.imageSmoothingEnabled = !crispHalftone(config, placement.drawW / density.width);
+    targetCtx.imageSmoothingEnabled = !crispHalftone(config, effScale);
+    targetCtx.imageSmoothingQuality = 'high';
     targetCtx.globalAlpha = layer.opacity;
     targetCtx.drawImage(tmp, placement.drawX, placement.drawY, placement.drawW, placement.drawH);
     targetCtx.restore();
