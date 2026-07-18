@@ -31,7 +31,7 @@ body {
 
 .app {
   display: grid;
-  grid-template-columns: 1fr 350px;
+  grid-template-columns: 1fr 360px;
   height: 100vh;
   gap: var(--spacing-md);
   padding: var(--spacing-md);
@@ -78,7 +78,6 @@ body {
   flex-direction: column;
   gap: var(--spacing-md);
   overflow-y: auto;
-  padding-right: var(--spacing-sm);
 }
 
 .settings-panel::-webkit-scrollbar {
@@ -292,13 +291,35 @@ button:disabled {
 .color-picker {
   z-index: 100;
   background: white;
-  border: 1px solid var(--color-border);
+  border: 1px solid #222;
   border-radius: var(--border-radius);
   padding: var(--spacing-sm);
-  display: grid;
-  grid-template-columns: repeat(5, 28px);
-  gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+}
+
+.color-picker-label {
+  font-size: 12px;
+  color: #222;
+  text-align: center;
+  min-height: 1.2em;
+  line-height: 1.2;
+}
+
+.color-picker-group-label {
+  font-size: 10px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.color-picker-group-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: calc(7 * 28px + 6 * 4px);
 }
 
 .color-picker-swatch {
@@ -306,8 +327,17 @@ button:disabled {
   height: 28px;
   border-radius: 3px;
   border: 1px solid var(--color-border);
+  box-sizing: border-box;
   cursor: pointer;
   transition: transform 0.1s;
+  position: relative;
+  mix-blend-mode: multiply;
+}
+
+.color-picker-swatch--active {
+  outline: 2px solid #222;
+  outline-offset: -1px;
+  z-index: 1;
 }
 
 .color-picker-swatch:hover {

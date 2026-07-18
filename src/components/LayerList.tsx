@@ -24,9 +24,10 @@ interface LayerListProps {
   actions: LayerActions;
   offsetEnabled: boolean;
   opacityEnabled: boolean;
+  paperColor?: string;
 }
 
-export function LayerList({ layers, actions, offsetEnabled, opacityEnabled }: LayerListProps) {
+export function LayerList({ layers, actions, offsetEnabled, opacityEnabled, paperColor }: LayerListProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sensors = useSensors(
@@ -75,6 +76,7 @@ export function LayerList({ layers, actions, offsetEnabled, opacityEnabled }: La
               layer={layer}
               offsetEnabled={offsetEnabled}
               opacityEnabled={opacityEnabled}
+              paperColor={paperColor}
               onRemove={() => actions.removeLayer(layer.id)}
               onNameChange={(name: string) => actions.updateLayerName(layer.id, name)}
               onColorChange={(ink: InkColor) => actions.updateLayerColor(layer.id, ink)}

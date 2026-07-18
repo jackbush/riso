@@ -43,7 +43,7 @@ export function SettingsPanel({
       <details className="pane" open>
         <summary className="pane-summary">Layers</summary>
         <div className="pane-body">
-          <LayerList layers={layers} actions={actions} offsetEnabled={config.offsetEnabled} opacityEnabled={config.opacityEnabled} />
+          <LayerList layers={layers} actions={actions} offsetEnabled={config.offsetEnabled} opacityEnabled={config.opacityEnabled} paperColor={config.paperColor} />
         </div>
       </details>
 

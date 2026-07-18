@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Layer, InkColor } from '../types';
@@ -11,6 +11,7 @@ interface LayerTileProps {
   layer: Layer;
   offsetEnabled: boolean;
   opacityEnabled: boolean;
+  paperColor?: string;
   onRemove: () => void;
   onNameChange: (name: string) => void;
   onColorChange: (inkColor: InkColor) => void;
@@ -23,6 +24,7 @@ export function LayerTile({
   layer,
   offsetEnabled,
   opacityEnabled,
+  paperColor,
   onRemove,
   onNameChange,
   onColorChange,
@@ -33,12 +35,27 @@ export function LayerTile({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const thumbnailRef = useRef<HTMLCanvasElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
-  const colorBtnRef = useRef<HTMLDivElement>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [pickerPos, setPickerPos] = useState<{ left: number; top: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState(layer.name);
+  const originalColorRef = useRef(layer.inkColor);
+
+  useEffect(() => {
+    if (showPicker) {
+      originalColorRef.current = layer.inkColor;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPicker]);
+
+  const handlePreview = useCallback((ink: InkColor | null) => {
+    if (ink) {
+      onColorChange(ink);
+    } else {
+      onColorChange(originalColorRef.current);
+    }
+  }, [onColorChange]);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: layer.id });
@@ -67,10 +84,6 @@ export function LayerTile({
   }, [editingName]);
 
   useEffect(() => {
-    if (showPicker && colorBtnRef.current) {
-      const rect = colorBtnRef.current.getBoundingClientRect();
-      setPickerPos({ left: rect.right, top: rect.bottom });
-    }
     if (!showPicker) setPickerPos(null);
   }, [showPicker]);
 
@@ -122,17 +135,27 @@ export function LayerTile({
       {/* Color preview */}
       <div className="layer-tile-color-wrap">
         <div
-          ref={colorBtnRef}
           className="layer-tile-color-preview"
           style={{ backgroundColor: layer.inkColor.hex }}
           title={layer.inkColor.name}
-          onClick={() => setShowPicker((v) => !v)}
+          onClick={(e) => {
+            if (!showPicker) {
+              setPickerPos({ left: e.clientX, top: e.clientY });
+            }
+            setShowPicker((v) => !v);
+          }}
         />
         {showPicker && pickerPos && (
           <div style={{ position: 'fixed', left: pickerPos.left, top: pickerPos.top, zIndex: 100 }}>
             <ColorPicker
-              onSelect={onColorChange}
+              onSelect={(ink) => {
+                originalColorRef.current = ink;
+                onColorChange(ink);
+              }}
               onClose={() => setShowPicker(false)}
+              currentColor={layer.inkColor}
+              paperColor={paperColor}
+              onPreview={handlePreview}
             />
           </div>
         )}
