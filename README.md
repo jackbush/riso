@@ -78,7 +78,7 @@ Honest caveats: doing this per RGB channel is a 3-channel approximation of what 
 
 - Start with **two layers, two inks**, and turn on ink transparency + a little spread + a little jitter. That alone reads as "riso" immediately.
 - Duotone trick: put the *same* photo on two layers and give them different inks and a slight offset.
-- Everything is specified in full-resolution pixels, and the export is what's authoritative — binary halftone dots can shimmer (alias) in the scaled-down preview even when the exported PNG is clean.
+- Everything is specified in full-resolution pixels, and the export is what's authoritative — binary halftone dots can shimmer (alias) in the scaled-down preview even when the exported PNG is clean. To judge the real thing, click anywhere on the preview (or hit **100%** in the bottom-left zoom controls) to inspect that spot at true export resolution, one image pixel per physical screen pixel; drag to pan around, click again to zoom back out.
 
 ---
 

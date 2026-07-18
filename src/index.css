@@ -66,6 +66,97 @@ body {
   max-height: 100%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.2s ease-in;
+  cursor: zoom-in;
+}
+
+/* 100% zoom: canvas fills the pane; the backing store is sized in device
+   pixels by useRenderPipeline so 1 image px = 1 physical px. */
+.preview-canvas--full {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  box-shadow: none;
+  animation: none;
+  cursor: grab;
+}
+
+.preview-canvas--full:active {
+  cursor: grabbing;
+}
+
+/* 100% zoom layout: preview takes the whole window, controls float on top */
+.app--zoom-full {
+  grid-template-columns: 1fr;
+  padding: 0;
+  gap: 0;
+}
+
+.app--zoom-full .settings-panel {
+  position: fixed;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  bottom: var(--spacing-md);
+  width: 360px;
+  z-index: 20;
+}
+
+/* Frozen snapshot of the outgoing view during a fit ⇄ 100% flip; sits above
+   the canvas but below the floating control panes, and fades/zooms away once
+   the incoming frame is ready. Background matches the page. */
+.zoom-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  background: #888888;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.zoom-transition-overlay canvas {
+  will-change: transform, opacity;
+}
+
+.zoom-controls {
+  position: fixed;
+  left: var(--spacing-md);
+  bottom: var(--spacing-md);
+  z-index: 20;
+  display: flex;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-radius: var(--border-radius);
+}
+
+.zoom-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-accent);
+  color: #ffffff;
+  border: 1px solid #333333;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.zoom-btn:first-child {
+  border-radius: var(--border-radius) 0 0 var(--border-radius);
+}
+
+.zoom-btn:last-child {
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  border-left: none;
+}
+
+.zoom-btn--active {
+  background: #ffffff;
+  color: var(--color-fg);
+  cursor: default;
+}
+
+/* Only the inactive view reacts to hover (generic button:hover darkens);
+   the active button is inert — clicking it is a no-op. */
+.zoom-btn--active:hover,
+.zoom-btn--active:active {
+  background-color: #ffffff;
 }
 
 @keyframes fadeIn {
@@ -78,6 +169,9 @@ body {
   flex-direction: column;
   gap: var(--spacing-md);
   overflow-y: auto;
+  /* Stay above the zoom-transition overlay (z 15) in both zoom modes */
+  position: relative;
+  z-index: 20;
 }
 
 .settings-panel::-webkit-scrollbar {

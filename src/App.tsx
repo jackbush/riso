@@ -6,12 +6,14 @@ import { exportFullRes } from './engine/renderer';
 import { loadImageFile } from './engine/imageLoader';
 import { loadPdfFile } from './engine/pdfLoader';
 import { RisoConfig } from './types';
+import { ZoomMode } from './hooks/useRenderPipeline';
 import './index.css';
 
 export function App() {
   const { layers, ...actions } = useLayerState();
   const layersRef = useRef(layers);
   layersRef.current = layers;
+  const [zoomMode, setZoomMode] = useState<ZoomMode>('fit');
 
   const [config, setConfig] = useState<RisoConfig>({
     offsetEnabled: false,
@@ -83,9 +85,14 @@ export function App() {
   }, [handleDrop]);
 
   return (
-    <div className="app">
+    <div className={`app${zoomMode === 'full' ? ' app--zoom-full' : ''}`}>
       {isDragOver && <div className="drop-overlay">Drop image or PDF to add layers</div>}
-      <PreviewPane layers={layers} config={config} />
+      <PreviewPane
+        layers={layers}
+        config={config}
+        zoomMode={zoomMode}
+        onZoomModeChange={setZoomMode}
+      />
       <SettingsPanel
         layers={layers}
         actions={actions}
