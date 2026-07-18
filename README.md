@@ -1,130 +1,83 @@
 # RISO
 
-**A risograph print emulator in your browser.** Drop in images, stack them as ink layers, and watch them overprint with all the beautiful accidents real riso is loved for — misregistration, ink bleed, halftone grain, and colors that mix like pigment instead of pixels.
+A risograph print emulator that runs in your browser. Drop in some images, stack them up as ink layers, and watch them overprint with all the happy accidents real riso is loved for — wonky registration, ink bleed, grain, and colours that mix like actual pigment instead of pixels.
 
-**Try it: [jackbush.github.io/riso](https://jackbush.github.io/riso/)** — no install, no account, nothing uploaded anywhere. Everything runs locally in your browser.
+**Try it: [jackbush.github.io/riso](https://jackbush.github.io/riso/)** — nothing gets uploaded, everything runs locally.
 
-## What's a risograph?
+## Riso?
 
-A risograph is a Japanese duplicator from the 80s — think "screen printing pretending to be a photocopier." It prints one vivid spot-color ink at a time, so multi-color prints are made by feeding the same paper through repeatedly, once per ink. The layers never line up perfectly, the inks are semi-transparent and mix where they overlap, and the whole thing has a warm, grainy, slightly-off charm that designers and artists adore.
+A risograph is a Japanese duplicator from the 80s. Think screen printing pretending to be a photocopier: it prints one vivid ink at a time, so a multi-colour print means feeding the same sheet through again and again. The layers never quite line up, the inks are semi-transparent and mix where they overlap, and the whole thing has a warm, slightly-off charm that a normal printer can't do.
 
-This emulator simulates that process so you can experiment freely: separate your artwork into layers, assign each one a real Riso ink color, and tune the imperfections to taste. When it looks right, export a full-resolution PNG — or use it to plan color separations before spending money at an actual riso print shop.
+This fakes all of that. Use it to play, or to plan colour separations before spending real money at a print shop.
 
----
+## How to use it
 
-## Using the emulator
+1. **Drag images (or a PDF) onto the page.** Each image becomes a layer, each PDF page too. Up to 7 — a real shop would charge you dearly for 7 passes.
+2. **Click a layer's colour strip** and pick an ink. The palette is ~30 real riso inks; Fluorescent Pink + Blue is a classic first combo.
+3. **Fiddle with the settings** until it feels like a print, not a screen. The defaults are already most of the way there.
+4. **Download** (bottom left) for a full-resolution PNG.
 
-### Quick start
+Layers turn grayscale on import: dark areas become heavy ink, light areas become bare paper. That's exactly how a real riso sees your artwork — one colour separation at a time. Drag the handle to reorder layers (they print bottom to top), click the name to rename, click the thumbnail to swap the image.
 
-1. **Drag an image (or PDF) anywhere onto the page.** Each image becomes a layer; each PDF page becomes its own layer. Or click **Add layers**.
-2. **Click a layer's color swatch** and pick an ink. The palette is ~30 real Riso inks with accurate hex values — Fluorescent Pink and Blue is a classic first combo.
-3. **Play with the toggles** in the settings panel until it feels like a print, not a screen.
-4. Hit **Download** (bottom-left, next to the zoom controls — it shows the exact pixel size) to export a full-resolution PNG.
+### The settings, top to bottom
 
-Every layer is converted to grayscale on import — dark areas become heavy ink, light areas become bare paper. That's exactly how a real riso "sees" your artwork, one color separation at a time. Up to 7 layers (a real print shop would charge you dearly for 7 passes).
+- **Paper size** — sized to your largest layer by default. *Smallest layer* crops everything down to it; *Zine* (A3 landscape) and *Drawing* (A4 portrait) are fixed 300dpi sheets.
+- **Paper color** — riso ink is translucent, so the paper glows through everything. The same print reads completely differently on Newsprint than on White.
+- **Margin** — extra paper around the artwork.
+- **Safe area** — keeps ink away from the paper edge, like a real riso's unprintable rim. Jitter can't sneak past it.
+- **Ink spread** — ink soaks into paper and creeps past its edges (printers call it dot gain). A little of it takes the digital crispness off.
+- **Halftone** — riso can't print grey, only dots. **Grain** is scattered stipple like modern riso output; **Dot screen** is classic printshop dots on a rotated grid. In dot-screen mode leave *Auto angles* on so overlapping layers don't fight — unless you want moiré as a texture, in which case set two layers to nearly the same angle and enjoy.
+- **Registration jitter** — every pass through a real machine lands a bit differently. It's seeded, so the preview is stable and the export matches it exactly. Hit **Re-roll** (bottom left) for a different accident.
+- **Ink blending** — how overlapping inks mix. **Realistic** is the good one (next section). **Simple** is multiply blending weighted by each ink's actual opacity — Black covers, Yellow dyes. **Off** treats every ink like coloured cellophane.
+- **Advanced layer options** — per-layer opacity, scale, and X/Y offset controls, for when you want to art-direct the accidents.
 
-### Layers
-
-- **Reorder** by dragging the handle — layers print bottom-to-top, and order matters once inks overlap.
-- **Rename** by clicking the name, **replace** the image by clicking the thumbnail, **remove** with ×.
-- With **Layer opacity** enabled, each layer gets a slider — like asking the print shop for a lighter ink pass.
-- With **Layer offset** enabled, each layer gets X/Y nudge controls for deliberate misalignment.
-
-### Paper
-
-Pick from presets (White, Eggshell, Natural, Stone, Newsprint) or type any hex color. Riso inks are translucent, so the paper glows through everything — the same print reads completely differently on newsprint than on bright white. **Paper size** resolves differently-sized layers to one sheet: the largest layer's dimensions (default), an intersection crop to the smallest, or a fixed sheet at 300dpi — Zine (A3 landscape) or Drawing (A4 portrait). **Margin** adds extra paper around the artwork. **Safe area** keeps ink away from the paper edge — nothing prints within that distance of the rim (jitter and offsets included), emulating a risograph's unprintable edge.
-
-### The imperfection toolbox
-
-Real riso is charming *because* it's imperfect. The defaults exercise the whole pipeline at tasteful strength — a little spread, grain halftone, a little jitter, Kubelka-Munk blending — so a fresh load already reads as riso. Everything below can be tuned or turned off.
-
-**Ink blending** — how overlapping inks mix. **Realistic (Kubelka-Munk)** (the default — see below) mixes them like real pigment. **Simple** uses multiply blending weighted by each ink's opacity: Black and Metallic Gold cover what's underneath, while Yellow and Fluorescent Pink are nearly pure dye. **Off** is flat multiply — every ink treated as colored cellophane.
-
-**Ink spread** — riso ink soaks into the paper and spreads slightly past its edges (printers call this dot gain). A little softening (the 0–5 px slider) takes the digital crispness off and makes overlaps feel organic.
-
-**Registration jitter** — every pass through a real riso lands a little differently. This shifts and rotates each layer by a small random amount. The randomness is seeded, so your preview is stable and the export matches it exactly — hit **Re-roll** when you want a different accident.
-
-**Halftone** — riso can't print true grays, only dots of ink. Pick a mode (stochastic by default, or turn it off for smooth grays):
-
-| Grain (stochastic) | Dot screen |
+| Grain | Dot screen |
 |---|---|
-| ![Stochastic halftone gradient](docs/demo-halftone-stochastic.png) | ![AM halftone gradient](docs/demo-halftone-am.png) |
-| Scattered grain, like modern riso output. One slider: grain size. | Classic printshop dots on a rotated grid. Sliders for dot spacing and screen angle. |
+| ![Grain halftone gradient](docs/demo-halftone-stochastic.png) | ![Dot screen halftone gradient](docs/demo-halftone-am.png) |
 
-In dot-screen mode, leave **Auto angles** on and each layer gets its own screen angle (0°, 15°, 45°, 75°) so overlapping screens don't fight. Turn it off to set one angle manually — and if you *want* moiré as a texture, setting two layers to nearly the same angle is how you get it.
+### The Realistic bit
 
-### Kubelka-Munk: making inks mix like actual ink
-
-Nearly every riso simulator computes overlaps with *multiply* blending — quick, decent, but it treats ink like colored cellophane. Real pigments both absorb *and scatter* light, and the Kubelka-Munk model from 1931 captures that. It's the default ink blending mode here. The practical difference:
+Nearly every riso simulator just multiplies colours together, which treats ink like coloured cellophane. Real pigment absorbs *and* scatters light, and there's been maths for that since 1931 — the Kubelka-Munk model. It's the default here, and it's why blue + yellow makes an actual green instead of instant mud:
 
 ![Kubelka-Munk vs multiply comparison](docs/demo-km-vs-multiply.png)
 
-Left is Kubelka-Munk, right is multiply — same three inks (Blue, Yellow, Fluorescent Pink). Blue + Yellow makes an actual green. Warm overlaps get richer, and triple overlaps go to deep ink tones instead of instant mud.
-
-When it's on, the **Order bias** slider makes lower layers count slightly more in the mix — ink printed first soaks deeper into the paper.
+Left is Kubelka-Munk, right is multiply — same three inks. The **Order bias** slider makes lower layers count a little more in the mix, because ink printed first soaks deeper into the paper.
 
 <details>
-<summary><strong>For the color nerds: what's actually computed</strong></summary>
+<summary>For the colour nerds</summary>
 
-Each ink's reflectance per RGB channel is inverted to an absorption/scattering ratio via the standard KM relation **K/S = (1 − R)² / 2R**. Per pixel, the K/S ratios of every layer (weighted by ink density and order bias) are summed on top of the paper's own K/S, then converted back to reflectance with **R = 1 + K/S − √((K/S)² + 2·K/S)**.
-
-Honest caveats: doing this per RGB channel is a 3-channel approximation of what is properly a spectral (per-wavelength) computation, and true KM also models film thickness and interface reflections (Saunderson correction), which we skip. Reflectance is floored near 1/255 so pure black doesn't send K/S to infinity. The round-trip is exact enough that a single ink at full density on white paper reproduces its own hex within one 8-bit step — that's the unit test.
+Each ink's reflectance is inverted per RGB channel via K/S = (1 − R)² / 2R, the per-pixel K/S sums (weighted by density and order bias) accumulate over the paper's own K/S, and the total converts back to reflectance. It's a 3-channel approximation of a properly spectral computation, and we skip film thickness and the Saunderson correction — but a single ink at full density on white paper reproduces its own hex within one 8-bit step, and that's the unit test.
 
 </details>
 
-### Tips for good fake prints
+### Tips
 
-- Start with **two layers, two inks** — the default spread + jitter + grain already reads as "riso" immediately. Hit **Re-roll** for a different registration accident.
-- Duotone trick: put the *same* photo on two layers and give them different inks and a slight offset.
-- Everything is specified in full-resolution pixels, and the export is what's authoritative — binary halftone dots can shimmer (alias) in the scaled-down preview even when the exported PNG is clean. To judge the real thing, click anywhere on the preview (or hit **100%** in the bottom-left zoom controls) to inspect that spot at true export resolution, one image pixel per physical screen pixel; drag to pan around, click again to zoom back out.
+- Two layers, two inks. That's it, that's the look.
+- Duotone trick: the *same* photo on two layers, different inks, slight offset.
+- The zoomed-out preview can shimmer — the export is the truth. Click anywhere on the preview (or hit **100%**) to inspect real pixels, drag to pan, click again to zoom back out.
 
----
-
-## Working on the project
-
-### Setup
+## Hacking on it
 
 ```
 npm install
 npm run dev      # Vite dev server
-npm run test     # vitest
-npm run build    # tsc --noEmit + vite build
+npm test         # vitest
+npm run build    # tsc + vite build
 ```
 
-React 19 + TypeScript + Vite. No state library — a `useLayerState` hook in `App` owns the layers, plain `useState` owns the config. Drag-to-reorder is `@dnd-kit`. Deploys to GitHub Pages via `.github/workflows/deploy.yml` on every push to `main` (note Vite `base: '/riso/'`).
-
-### Architecture
-
-The interesting code is `src/engine/`, and it's organized as a **density pipeline** — each stage is a pure function over grayscale "ink density" `ImageData` that no-ops when its feature is off:
+React 19 + TypeScript + Vite, no state library. Pushes to `main` deploy to GitHub Pages. The interesting code is `src/engine/` — a density pipeline where each stage is a pure function over grayscale "ink density" `ImageData` that no-ops when its feature is off:
 
 ```
 upload → toGrayscale ─→ spread (blur.ts) ─→ halftone (halftone.ts) ─→ blend
-                                                                       ├─ multiply path: tint + canvas 'multiply'
-                                                                       └─ Kubelka-Munk path (kubelkaMunk.ts)
+                                                                      ├─ multiply path: tint + canvas 'multiply'
+                                                                      └─ Kubelka-Munk path (kubelkaMunk.ts)
 ```
 
-- `engine/compositor.ts` — orchestrates the pipeline and both blend paths; owns layer placement (centering, offsets, jitter, margin, safe-area clip)
-- `engine/blur.ts` — 3-pass separable box blur (≈ Gaussian) for ink spread
-- `engine/halftone.ts` — blue-noise matrix + both halftone screens
-- `engine/kubelkaMunk.ts` — KM math as pure, tested functions
-- `engine/prng.ts` — seeded PRNG (mulberry32) for jitter
-- `engine/renderer.ts` — preview render + full-res PNG export
-- `hooks/useRenderPipeline.ts` — debounced (150 ms) preview re-render + ResizeObserver
+Things worth knowing before you change it:
 
-New effects should slot into the pipeline as a stage or a blend path — not as conditionals sprinkled through `composite()`.
-
-### Key decisions (and the reasoning)
-
-- **Everything is pixels, not physical units.** There's no DPI anywhere; halftone spacing, blur radii, and offsets are all in full-resolution pixels. Canvas size is the largest uploaded image (or smallest, per the paper-size setting), capped at 6400×6400 (≈ A3 at 400 dpi). Effects are applied to full-res data *before* the preview downscale, so preview shrinking scales them proportionally for free — never scale an effect radius by render scale, that double-applies it.
-- **Randomness is always seeded.** Jitter uses mulberry32 keyed by `layer.id` ⊕ seed (keyed by id, not index, so reordering layers doesn't reshuffle their jitter). Export reuses the preview's seed and matches it exactly; new randomness only comes from the explicit Re-roll button.
-- **Expensive stages are cached per layer.** Spread, halftone, tint, and downscale-prefilter results are memoized in `WeakMap`s keyed by input `ImageData` + parameters, so a debounced re-render triggered by an unrelated slider doesn't re-process a 6400px image. The caches chain (each stage keys off the previous stage's output) and are LRU-capped at 2 entries per stage — dragging a slider across its range must not retain a full-resolution result per notch.
-- **The blue-noise matrix is generated, not shipped.** 64×64 void-and-cluster with a fixed seed, built once on first use. Fixed seed ⇒ identical grain in preview and export.
-- **Kubelka-Munk doesn't reimplement geometry.** The KM path rasterizes each layer's *density* onto a white canvas using the same shared placement code as the multiply path — so resampling, centering, jitter rotation, and opacity (`globalAlpha` over white scales density exactly) come free from `drawImage`. Only the per-pixel mixing loop is hand-written, and both the rasterization and the mixing run in 256-row strips (one reused strip canvas, translated per strip) so peak memory stays bounded at export size regardless of layer count.
-- **K/S values are derived from hex at use time** (memoized), not stored in the palette — ink colors are user-customizable, so precomputed coefficients would break custom picks.
-- **Mutual exclusions are modeled in the UI**, not silently resolved: the halftone screens share one dropdown, and the three ink blending strategies (Kubelka-Munk, per-ink transparency, flat multiply) share another; halftone + ink spread stack deliberately.
-
-### Testing
-
-`vitest` + jsdom. jsdom has no canvas, so the engine is written to keep math in pure functions over typed arrays (`ImageData` is polyfilled in tests) — blur kernels, PRNG determinism, halftone coverage/monotonicity, KM round-trips are all unit-tested, while canvas plumbing (`composite` itself) is verified in the browser. Keep it that way: if you add an effect, put the math where a test can reach it.
-
-Config lives in `RisoConfig` (`src/types.ts`); defaults are initialized in `App.tsx`, so every new config field needs a default there. Each new effect gets: a type field, a default, a ConfigPanel control, a pipeline stage, and tests.
+- **Everything is full-resolution pixels, no DPI anywhere.** Effects run on full-res data *before* the preview downscale — never scale an effect radius by render scale, that double-applies it.
+- **Randomness is always seeded**, keyed by layer id (not index, so reordering doesn't reshuffle jitter). The export reuses the preview's seed and matches it exactly.
+- **Heavy stages are cached** in `WeakMap`s chained stage to stage (spread → halftone → tint → downscale prefilter), LRU-capped so slider-dragging can't hoard full-res buffers.
+- **The KM path doesn't reimplement geometry** — it rasterizes density with the same shared placement code as the multiply path, then mixes per-pixel in 256-row strips so export memory stays sane.
+- **jsdom has no canvas**, so keep maths in pure functions over typed arrays where vitest can reach it; the canvas plumbing is verified in the browser.
+- A new effect gets: a `RisoConfig` field, a default in `App.tsx`, a ConfigPanel control, a pipeline stage (not conditionals sprinkled through `composite()`), and tests.
