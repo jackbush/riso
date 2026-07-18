@@ -220,6 +220,18 @@ function computeLayerPlacement(
   return { drawX, drawY, drawW, drawH, rotationDeg };
 }
 
+/**
+ * Binary halftone dots drawn at 1:1 scale must be point-sampled, not
+ * interpolated: bilinear resampling of a 1-px stipple under the jitter's
+ * sub-pixel shift + small rotation beats against the pixel grid and shows up
+ * as faint horizontal/vertical moiré bands. At preview scales (< 1) smoothing
+ * stays on — nearest-neighbor downscaling would alias far worse, and the
+ * export is the authoritative render anyway.
+ */
+function crispHalftone(config: RisoConfig, scale: number): boolean {
+  return config.halftoneMode !== 'off' && scale === 1;
+}
+
 function applyPlacementRotation(ctx: CanvasRenderingContext2D, p: LayerPlacement): void {
   if (p.rotationDeg === 0) return;
   const centerX = p.drawX + p.drawW / 2;
@@ -297,6 +309,7 @@ export function composite(
 
     ctx.save();
     applyPlacementRotation(ctx, placement);
+    ctx.imageSmoothingEnabled = !crispHalftone(config, scale);
 
     if (config.inkBlendMode === 'simple') {
       // Blend between pure multiply (transparent, dye-like inks — shows what's
@@ -396,6 +409,7 @@ function kmComposite(
     );
     targetCtx.save();
     applyPlacementRotation(targetCtx, placement);
+    targetCtx.imageSmoothingEnabled = !crispHalftone(config, scale);
     targetCtx.globalAlpha = layer.opacity;
     targetCtx.drawImage(tmp, placement.drawX, placement.drawY, placement.drawW, placement.drawH);
     targetCtx.restore();
