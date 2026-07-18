@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { RisoConfig } from '../types';
 
 const PAPER_PRESETS = [
@@ -16,17 +16,51 @@ interface ConfigPanelProps {
 
 export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
   const [hexInput, setHexInput] = useState(config.paperColor);
+  const [showPaperPalette, setShowPaperPalette] = useState(false);
+  const paperControlRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     setHexInput(config.paperColor);
   }, [config.paperColor]);
 
+  useEffect(() => {
+    if (!showPaperPalette) return;
+    function handleMouseDown(e: MouseEvent) {
+      if (paperControlRef.current && !paperControlRef.current.contains(e.target as Node)) {
+        setShowPaperPalette(false);
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
+  }, [showPaperPalette]);
+
   return (
     <>
+      {/* Paper size */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Paper size</span>
+        <select
+          value={config.paperSize}
+          onChange={(e) =>
+            onChange({ paperSize: e.target.value as RisoConfig['paperSize'] })
+          }
+        >
+          <option value="largest">Largest layer</option>
+          <option value="smallest">Smallest layer</option>
+        </select>
+      </label>
+
       {/* Paper color */}
-      <div className="config-item">
-        <label className="config-item config-item--row">
-          <span className="config-label">Paper color</span>
+      <div className="config-item config-item--row">
+        <span className="config-label">Paper color</span>
+        <span className="paper-color-control" ref={paperControlRef}>
+          <button
+            type="button"
+            className="paper-color-swatch"
+            style={{ backgroundColor: config.paperColor }}
+            title="Paper presets"
+            onClick={() => setShowPaperPalette((s) => !s)}
+          />
           <input
             type="text"
             value={hexInput}
@@ -39,19 +73,38 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
             className="config-inline-input"
             spellCheck={false}
           />
-        </label>
-        <div className="paper-preset-row">
-          {PAPER_PRESETS.map((preset) => (
-            <button
-              key={preset.hex}
-              className={`paper-preset-swatch${config.paperColor.toUpperCase() === preset.hex.toUpperCase() ? ' paper-preset-swatch--active' : ''}`}
-              style={{ backgroundColor: preset.hex }}
-              title={preset.name}
-              onClick={() => onChange({ paperColor: preset.hex })}
-            />
-          ))}
-        </div>
+          {showPaperPalette && (
+            <div className="paper-palette">
+              {PAPER_PRESETS.map((preset) => (
+                <button
+                  key={preset.hex}
+                  className={`paper-preset-swatch${config.paperColor.toUpperCase() === preset.hex.toUpperCase() ? ' paper-preset-swatch--active' : ''}`}
+                  style={{ backgroundColor: preset.hex }}
+                  title={preset.name}
+                  onClick={() => {
+                    onChange({ paperColor: preset.hex });
+                    setShowPaperPalette(false);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </span>
       </div>
+
+      {/* Margin */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Margin (px)</span>
+        <input
+          type="number"
+          min={0}
+          max={500}
+          step={10}
+          value={config.margin}
+          onChange={(e) => onChange({ margin: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+          className="config-inline-input"
+        />
+      </label>
 
       {/* Safe area */}
       <label className="config-item config-item--row">

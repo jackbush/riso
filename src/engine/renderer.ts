@@ -6,24 +6,30 @@ const DEFAULT_WIDTH = 800;
 const DEFAULT_HEIGHT = 600;
 
 /**
- * Compute composite canvas dimensions from the largest layer image.
+ * Compute composite canvas dimensions from the layer images: the largest
+ * layer's per-axis extents, or the smallest's (an intersection crop — layers
+ * are centered, so larger images crop equally on all sides).
  * Caps at 6400 per axis. Returns 800×600 if no layers have images.
  */
-export function getCompositeDimensions(layers: Layer[]): {
+export function getCompositeDimensions(
+  layers: Layer[],
+  paperSize: 'largest' | 'smallest' = 'largest',
+): {
   width: number;
   height: number;
 } {
-  let maxW = 0;
-  let maxH = 0;
+  let w = 0;
+  let h = 0;
+  const pick = paperSize === 'smallest' ? Math.min : Math.max;
   for (const layer of layers) {
     if (layer.grayscaleData) {
-      maxW = Math.max(maxW, layer.grayscaleData.width);
-      maxH = Math.max(maxH, layer.grayscaleData.height);
+      w = w ? pick(w, layer.grayscaleData.width) : layer.grayscaleData.width;
+      h = h ? pick(h, layer.grayscaleData.height) : layer.grayscaleData.height;
     }
   }
   return {
-    width: Math.min(maxW || DEFAULT_WIDTH, MAX_DIMENSION),
-    height: Math.min(maxH || DEFAULT_HEIGHT, MAX_DIMENSION),
+    width: Math.min(w || DEFAULT_WIDTH, MAX_DIMENSION),
+    height: Math.min(h || DEFAULT_HEIGHT, MAX_DIMENSION),
   };
 }
 
@@ -40,7 +46,7 @@ export function render(
   config: RisoConfig,
   scale = 1,
 ): HTMLCanvasElement {
-  const { width: fullW, height: fullH } = getCompositeDimensions(layers);
+  const { width: fullW, height: fullH } = getCompositeDimensions(layers, config.paperSize);
   const targetW = Math.round(fullW * scale);
   const targetH = Math.round(fullH * scale);
 

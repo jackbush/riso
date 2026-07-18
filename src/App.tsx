@@ -29,6 +29,8 @@ export function App() {
     halftoneAngle: null,
     kubelkaMunkOrderBias: 0.3,
     paperColor: '#FFFDF5',
+    paperSize: 'largest',
+    margin: 0,
     safeArea: 0,
   });
   const [isDragOver, setIsDragOver] = useState(false);

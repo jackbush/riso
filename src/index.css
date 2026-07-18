@@ -614,20 +614,47 @@ button:disabled {
   min-height: 26px;
 }
 
-.paper-preset-row {
+.paper-color-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.paper-color-swatch {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--color-fg);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Mini preset palette, dropped below the swatch */
+.paper-palette {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 100;
   display: flex;
   gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  background: #ffffff;
+  border: 1px solid var(--color-fg);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .paper-preset-swatch {
-  flex: 1;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 1px solid var(--color-fg);
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: transform 0.1s;
+  flex-shrink: 0;
 }
 
 .paper-preset-swatch:hover {

@@ -178,7 +178,7 @@ interface LayerPlacement {
 
 /**
  * Where a layer's (density-sized) image lands on the output canvas: centered
- * in the content area, pushed by the safe-area margin, then shifted by the
+ * in the content area, pushed by the paper margin, then shifted by the
  * layer offset and registration jitter (all scaled). Shared by the multiply
  * and Kubelka-Munk paths so both apply identical geometry.
  */
@@ -190,12 +190,12 @@ function computeLayerPlacement(
   scale: number,
   targetW: number,
   targetH: number,
-  safe: number,
+  margin: number,
 ): LayerPlacement {
   const drawW = srcW * scale;
   const drawH = srcH * scale;
-  let drawX = safe + (targetW - drawW) / 2;
-  let drawY = safe + (targetH - drawH) / 2;
+  let drawX = margin + (targetW - drawW) / 2;
+  let drawY = margin + (targetH - drawH) / 2;
 
   if (config.advancedLayerOptionsEnabled) {
     drawX += layer.offsetX * scale;
@@ -230,6 +230,26 @@ function computeLayerPlacement(
  */
 function crispHalftone(config: RisoConfig, scale: number): boolean {
   return config.halftoneMode !== 'off' && scale === 1;
+}
+
+/**
+ * Safe area: no ink lands within `config.safeArea` px (full-res) of the paper
+ * edge — emulating a risograph's unprintable rim. Only the paper color shows
+ * there, so the clip applies to layer draws, not the background fill. Must be
+ * applied in canvas space, i.e. before any placement rotation.
+ */
+function applySafeAreaClip(
+  ctx: CanvasRenderingContext2D,
+  config: RisoConfig,
+  scale: number,
+  width: number,
+  height: number,
+): void {
+  const inset = Math.round((config.safeArea ?? 0) * scale);
+  if (inset <= 0) return;
+  ctx.beginPath();
+  ctx.rect(inset, inset, Math.max(0, width - 2 * inset), Math.max(0, height - 2 * inset));
+  ctx.clip();
 }
 
 function applyPlacementRotation(ctx: CanvasRenderingContext2D, p: LayerPlacement): void {
@@ -272,16 +292,19 @@ export function composite(
   }
 
   const scale = targetW / fullW;
-  const safe = Math.round((config.safeArea ?? 0) * scale);
+  const margin = Math.round((config.margin ?? 0) * scale);
 
   const canvas = document.createElement('canvas');
-  canvas.width = targetW + 2 * safe;
-  canvas.height = targetH + 2 * safe;
+  canvas.width = targetW + 2 * margin;
+  canvas.height = targetH + 2 * margin;
   const ctx = canvas.getContext('2d')!;
 
   // 1. Paper background
   ctx.fillStyle = config.paperColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // No ink inside the safe area — clip all layer draws to the printable rect
+  applySafeAreaClip(ctx, config, scale, canvas.width, canvas.height);
 
   // 2. Composite each visible layer. The index (position in the full layer
   // list, not just visible ones) keys the auto AM screen angle, so toggling
@@ -303,7 +326,7 @@ export function composite(
       scale,
       targetW,
       targetH,
-      safe,
+      margin,
     );
     const { drawX, drawY, drawW, drawH } = placement;
 
@@ -371,9 +394,9 @@ function kmComposite(
   fullW: number,
 ): HTMLCanvasElement {
   const scale = targetW / fullW;
-  const safe = Math.round((config.safeArea ?? 0) * scale);
-  const width = targetW + 2 * safe;
-  const height = targetH + 2 * safe;
+  const margin = Math.round((config.margin ?? 0) * scale);
+  const width = targetW + 2 * margin;
+  const height = targetH + 2 * margin;
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -405,9 +428,11 @@ function kmComposite(
       scale,
       targetW,
       targetH,
-      safe,
+      margin,
     );
     targetCtx.save();
+    // Outside the clip the buffer stays white = zero density = no ink
+    applySafeAreaClip(targetCtx, config, scale, width, height);
     applyPlacementRotation(targetCtx, placement);
     targetCtx.imageSmoothingEnabled = !crispHalftone(config, scale);
     targetCtx.globalAlpha = layer.opacity;

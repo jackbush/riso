@@ -32,7 +32,7 @@ Every layer is converted to grayscale on import — dark areas become heavy ink,
 
 ### Paper
 
-Pick from presets (White, Eggshell, Natural, Stone, Newsprint) or type any hex color. Riso inks are translucent, so the paper glows through everything — the same print reads completely differently on newsprint than on bright white. **Safe area** adds a paper margin around the artwork.
+Pick from presets (White, Eggshell, Natural, Stone, Newsprint) or type any hex color. Riso inks are translucent, so the paper glows through everything — the same print reads completely differently on newsprint than on bright white. **Paper size** resolves differently-sized layers to one sheet: the largest layer's dimensions (default) or an intersection crop to the smallest. **Margin** adds extra paper around the artwork. **Safe area** keeps ink away from the paper edge — nothing prints within that distance of the rim (jitter and offsets included), emulating a risograph's unprintable edge.
 
 ### The imperfection toolbox
 
@@ -103,7 +103,7 @@ upload → toGrayscale ─→ spread (blur.ts) ─→ halftone (halftone.ts) ─
                                                                        └─ Kubelka-Munk path (kubelkaMunk.ts)
 ```
 
-- `engine/compositor.ts` — orchestrates the pipeline and both blend paths; owns layer placement (centering, offsets, jitter, safe area)
+- `engine/compositor.ts` — orchestrates the pipeline and both blend paths; owns layer placement (centering, offsets, jitter, margin, safe-area clip)
 - `engine/blur.ts` — 3-pass separable box blur (≈ Gaussian) for ink spread
 - `engine/halftone.ts` — blue-noise matrix + both halftone screens
 - `engine/kubelkaMunk.ts` — KM math as pure, tested functions
@@ -115,7 +115,7 @@ New effects should slot into the pipeline as a stage or a blend path — not as 
 
 ### Key decisions (and the reasoning)
 
-- **Everything is pixels, not physical units.** There's no DPI anywhere; halftone spacing, blur radii, and offsets are all in full-resolution pixels. Canvas size is the largest uploaded image, capped at 6400×6400 (≈ A3 at 400 dpi). Effects are applied to full-res data *before* the preview downscale, so preview shrinking scales them proportionally for free — never scale an effect radius by render scale, that double-applies it.
+- **Everything is pixels, not physical units.** There's no DPI anywhere; halftone spacing, blur radii, and offsets are all in full-resolution pixels. Canvas size is the largest uploaded image (or smallest, per the paper-size setting), capped at 6400×6400 (≈ A3 at 400 dpi). Effects are applied to full-res data *before* the preview downscale, so preview shrinking scales them proportionally for free — never scale an effect radius by render scale, that double-applies it.
 - **Randomness is always seeded.** Jitter uses mulberry32 keyed by `layer.id` ⊕ seed (keyed by id, not index, so reordering layers doesn't reshuffle their jitter). Export reuses the preview's seed and matches it exactly; new randomness only comes from the explicit Re-roll button.
 - **Expensive stages are cached per layer.** Spread and halftone results are memoized in `WeakMap`s keyed by input `ImageData` + parameters, so a debounced re-render triggered by an unrelated slider doesn't re-blur a 6400px image. The caches chain (halftone caches on top of blurred output).
 - **The blue-noise matrix is generated, not shipped.** 64×64 void-and-cluster with a fixed seed, built once on first use. Fixed seed ⇒ identical grain in preview and export.

@@ -46,9 +46,12 @@ export function PreviewPane({
   const [canvasReady, setCanvasReady] = useState(false);
 
   const isEmpty = !layers.some((l) => l.grayscaleData);
-  const { width: compositeW, height: compositeH } = getCompositeDimensions(layers);
-  const exportW = compositeW + 2 * (config.safeArea ?? 0);
-  const exportH = compositeH + 2 * (config.safeArea ?? 0);
+  const { width: compositeW, height: compositeH } = getCompositeDimensions(
+    layers,
+    config.paperSize,
+  );
+  const exportW = compositeW + 2 * (config.margin ?? 0);
+  const exportH = compositeH + 2 * (config.margin ?? 0);
 
   const clearOverlay = useCallback(() => {
     overlayRef.current?.remove();
@@ -127,7 +130,8 @@ export function PreviewPane({
     // rect; a 100% view is 1 image px per device px. Works identically in
     // both flip directions.
     const fullResW =
-      getCompositeDimensions(layers).width + 2 * Math.round(config.safeArea ?? 0);
+      getCompositeDimensions(layers, config.paperSize).width +
+      2 * Math.round(config.margin ?? 0);
     const oldScale = target === 'full' ? fromRect.width / fullResW : 1 / dpr;
     const newScale = target === 'full' ? 1 / dpr : newRect.width / fullResW;
     const k = newScale / oldScale;

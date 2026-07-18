@@ -119,7 +119,10 @@ export function useRenderPipeline(
 
       let scale = 1;
       if (modeRef.current === 'fit') {
-        const { width: fullW, height: fullH } = getCompositeDimensions(currentLayers);
+        const { width: fullW, height: fullH } = getCompositeDimensions(
+          currentLayers,
+          configRef.current.paperSize,
+        );
         // Scale to fit container (with padding so canvas doesn't touch edges)
         const rect = container.getBoundingClientRect();
         const padding = 32;
