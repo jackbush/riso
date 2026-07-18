@@ -19,6 +19,9 @@ export function App() {
     inkTransparencyEnabled: false,
     inkSpreadEnabled: false,
     inkSpreadAmount: 1.5,
+    registrationJitterEnabled: false,
+    registrationJitterAmount: 2,
+    registrationJitterSeed: 1,
     paperColor: '#FFFDF5',
     safeArea: 0,
   });

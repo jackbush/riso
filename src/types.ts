@@ -23,6 +23,9 @@ export interface RisoConfig {
   inkTransparencyEnabled: boolean;
   inkSpreadEnabled: boolean;
   inkSpreadAmount: number; // 0-5px at full resolution
+  registrationJitterEnabled: boolean;
+  registrationJitterAmount: number; // 0-10px at full resolution
+  registrationJitterSeed: number;
   paperColor: string;
   safeArea: number; // pixels at full resolution
 }

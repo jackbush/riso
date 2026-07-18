@@ -1,5 +1,6 @@
 import { Layer, RisoConfig } from '../types';
 import { densityBoxBlur } from './blur';
+import { computeRegistrationJitter } from './prng';
 
 /**
  * Parse a hex color string to [R, G, B] values (0-255).
@@ -182,7 +183,30 @@ export function composite(
       drawY += layer.offsetY * scale;
     }
 
+    // Apply registration jitter (scaled): random per-layer shift, keyed by
+    // layer id + seed so it's stable across re-renders and only changes on
+    // an explicit re-roll (or a slider change).
+    let jitterRotationDeg = 0;
+    if (config.registrationJitterEnabled) {
+      const jitter = computeRegistrationJitter(
+        config.registrationJitterSeed,
+        config.registrationJitterAmount,
+        layer.id,
+      );
+      drawX += jitter.dx * scale;
+      drawY += jitter.dy * scale;
+      jitterRotationDeg = jitter.rotationDeg;
+    }
+
     ctx.save();
+
+    if (jitterRotationDeg !== 0) {
+      const centerX = drawX + drawW / 2;
+      const centerY = drawY + drawH / 2;
+      ctx.translate(centerX, centerY);
+      ctx.rotate((jitterRotationDeg * Math.PI) / 180);
+      ctx.translate(-centerX, -centerY);
+    }
 
     if (config.inkTransparencyEnabled) {
       // Blend between pure multiply (transparent, dye-like inks — shows what's

@@ -119,6 +119,40 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
           />
         </label>
       )}
+
+      {/* Registration jitter */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Registration jitter</span>
+        <input
+          type="checkbox"
+          checked={config.registrationJitterEnabled}
+          onChange={(e) => onChange({ registrationJitterEnabled: e.target.checked })}
+        />
+      </label>
+      {config.registrationJitterEnabled && (
+        <>
+          <label className="config-item config-item--row">
+            <span className="config-label">Jitter amount (px)</span>
+            <input
+              type="range"
+              min={0}
+              max={10}
+              step={0.5}
+              value={config.registrationJitterAmount}
+              onChange={(e) => onChange({ registrationJitterAmount: parseFloat(e.target.value) })}
+            />
+          </label>
+          <div className="config-item config-item--row">
+            <span className="config-label">Re-roll</span>
+            <button
+              type="button"
+              onClick={() => onChange({ registrationJitterSeed: Math.floor(Math.random() * 2 ** 31) })}
+            >
+              Re-roll
+            </button>
+          </div>
+        </>
+      )}
     </>
   );
 }
