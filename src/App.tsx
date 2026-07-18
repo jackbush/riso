@@ -18,9 +18,9 @@ export function App() {
   const [config, setConfig] = useState<RisoConfig>({
     advancedLayerOptionsEnabled: false,
     inkBlendMode: 'km',
-    inkSpreadEnabled: false,
+    inkSpreadEnabled: true,
     inkSpreadAmount: 1.5,
-    registrationJitterEnabled: false,
+    registrationJitterEnabled: true,
     registrationJitterAmount: 2,
     registrationJitterSeed: 1,
     halftoneMode: 'stochastic',

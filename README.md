@@ -36,9 +36,9 @@ Pick from presets (White, Eggshell, Natural, Stone, Newsprint) or type any hex c
 
 ### The imperfection toolbox
 
-Real riso is charming *because* it's imperfect. Ink blending and halftone are on by default; the rest are off — turn them on and stack them.
+Real riso is charming *because* it's imperfect. The defaults exercise the whole pipeline at tasteful strength — a little spread, grain halftone, a little jitter, Kubelka-Munk blending — so a fresh load already reads as riso. Everything below can be tuned or turned off.
 
-**Ink blending** — how overlapping inks mix. **Kubelka-Munk** (the default — see below) mixes them like real pigment. **Simple** uses multiply blending weighted by each ink's opacity: Black and Metallic Gold cover what's underneath, while Yellow and Fluorescent Pink are nearly pure dye. **Off** is flat multiply — every ink treated as colored cellophane.
+**Ink blending** — how overlapping inks mix. **Realistic (Kubelka-Munk)** (the default — see below) mixes them like real pigment. **Simple** uses multiply blending weighted by each ink's opacity: Black and Metallic Gold cover what's underneath, while Yellow and Fluorescent Pink are nearly pure dye. **Off** is flat multiply — every ink treated as colored cellophane.
 
 **Ink spread** — riso ink soaks into the paper and spreads slightly past its edges (printers call this dot gain). A little softening (the 0–5 px slider) takes the digital crispness off and makes overlaps feel organic.
 
@@ -46,7 +46,7 @@ Real riso is charming *because* it's imperfect. Ink blending and halftone are on
 
 **Halftone** — riso can't print true grays, only dots of ink. Pick a mode (stochastic by default, or turn it off for smooth grays):
 
-| Stochastic | Dot screen |
+| Grain (stochastic) | Dot screen |
 |---|---|
 | ![Stochastic halftone gradient](docs/demo-halftone-stochastic.png) | ![AM halftone gradient](docs/demo-halftone-am.png) |
 | Scattered grain, like modern riso output. One slider: grain size. | Classic printshop dots on a rotated grid. Sliders for dot spacing and screen angle. |
@@ -74,7 +74,7 @@ Honest caveats: doing this per RGB channel is a 3-channel approximation of what 
 
 ### Tips for good fake prints
 
-- Start with **two layers, two inks**, and add a little spread + a little jitter to the defaults. That alone reads as "riso" immediately.
+- Start with **two layers, two inks** — the default spread + jitter + grain already reads as "riso" immediately. Hit **Re-roll** for a different registration accident.
 - Duotone trick: put the *same* photo on two layers and give them different inks and a slight offset.
 - Everything is specified in full-resolution pixels, and the export is what's authoritative — binary halftone dots can shimmer (alias) in the scaled-down preview even when the exported PNG is clean. To judge the real thing, click anywhere on the preview (or hit **100%** in the bottom-left zoom controls) to inspect that spot at true export resolution, one image pixel per physical screen pixel; drag to pan around, click again to zoom back out.
 

@@ -122,34 +122,6 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         />
       </label>
 
-      {/* Ink blending */}
-      <label className="config-item config-item--row">
-        <span className="config-label">Ink blending</span>
-        <select
-          value={config.inkBlendMode}
-          onChange={(e) =>
-            onChange({ inkBlendMode: e.target.value as RisoConfig['inkBlendMode'] })
-          }
-        >
-          <option value="km">Kubelka-Munk</option>
-          <option value="simple">Simple</option>
-          <option value="off">Off</option>
-        </select>
-      </label>
-      {config.inkBlendMode === 'km' && (
-        <label className="config-item config-item--row">
-          <span className="config-label">Order bias</span>
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.1}
-            value={config.kubelkaMunkOrderBias}
-            onChange={(e) => onChange({ kubelkaMunkOrderBias: parseFloat(e.target.value) })}
-          />
-        </label>
-      )}
-
       {/* Ink spread */}
       <label className="config-item config-item--row">
         <span className="config-label">Ink spread</span>
@@ -161,7 +133,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
       </label>
       {config.inkSpreadEnabled && (
         <label className="config-item config-item--row">
-          <span className="config-label">Spread amount (px)</span>
+          <span className="config-label">↳ Spread amount (px)</span>
           <input
             type="range"
             min={0}
@@ -182,14 +154,14 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
             onChange({ halftoneMode: e.target.value as RisoConfig['halftoneMode'] })
           }
         >
-          <option value="stochastic">Stochastic</option>
+          <option value="stochastic">Grain</option>
           <option value="am">Dot screen</option>
           <option value="off">Off</option>
         </select>
       </label>
       {config.halftoneMode === 'stochastic' && (
         <label className="config-item config-item--row">
-          <span className="config-label">Grain size (px)</span>
+          <span className="config-label">↳ Grain size (px)</span>
           <input
             type="range"
             min={1}
@@ -203,7 +175,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
       {config.halftoneMode === 'am' && (
         <>
           <label className="config-item config-item--row">
-            <span className="config-label">Dot spacing (px)</span>
+            <span className="config-label">↳ Dot spacing (px)</span>
             <input
               type="range"
               min={4}
@@ -214,7 +186,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
             />
           </label>
           <label className="config-item config-item--row">
-            <span className="config-label">Auto angles</span>
+            <span className="config-label">↳ Auto angles</span>
             <input
               type="checkbox"
               checked={config.halftoneAngle === null}
@@ -223,7 +195,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
           </label>
           {config.halftoneAngle !== null && (
             <label className="config-item config-item--row">
-              <span className="config-label">Screen angle (°)</span>
+              <span className="config-label">↳ Screen angle (°)</span>
               <input
                 type="range"
                 min={0}
@@ -248,7 +220,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
       </label>
       {config.registrationJitterEnabled && (
         <label className="config-item config-item--row">
-          <span className="config-label">Jitter amount (px)</span>
+          <span className="config-label">↳ Jitter amount (px)</span>
           <input
             type="range"
             min={0}
@@ -256,6 +228,34 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
             step={0.5}
             value={config.registrationJitterAmount}
             onChange={(e) => onChange({ registrationJitterAmount: parseFloat(e.target.value) })}
+          />
+        </label>
+      )}
+
+      {/* Ink blending */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Ink blending</span>
+        <select
+          value={config.inkBlendMode}
+          onChange={(e) =>
+            onChange({ inkBlendMode: e.target.value as RisoConfig['inkBlendMode'] })
+          }
+        >
+          <option value="km">Realistic</option>
+          <option value="simple">Simple</option>
+          <option value="off">Off</option>
+        </select>
+      </label>
+      {config.inkBlendMode === 'km' && (
+        <label className="config-item config-item--row">
+          <span className="config-label">↳ Order bias</span>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.1}
+            value={config.kubelkaMunkOrderBias}
+            onChange={(e) => onChange({ kubelkaMunkOrderBias: parseFloat(e.target.value) })}
           />
         </label>
       )}
