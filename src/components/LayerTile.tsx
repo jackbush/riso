@@ -33,7 +33,9 @@ export function LayerTile({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const thumbnailRef = useRef<HTMLCanvasElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const colorBtnRef = useRef<HTMLDivElement>(null);
   const [showPicker, setShowPicker] = useState(false);
+  const [pickerPos, setPickerPos] = useState<{ left: number; top: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState(layer.name);
@@ -63,6 +65,14 @@ export function LayerTile({
   useEffect(() => {
     if (editingName) nameInputRef.current?.select();
   }, [editingName]);
+
+  useEffect(() => {
+    if (showPicker && colorBtnRef.current) {
+      const rect = colorBtnRef.current.getBoundingClientRect();
+      setPickerPos({ left: rect.right, top: rect.bottom });
+    }
+    if (!showPicker) setPickerPos(null);
+  }, [showPicker]);
 
   function commitName() {
     const trimmed = nameDraft.trim();
@@ -110,15 +120,16 @@ export function LayerTile({
       </div>
 
       {/* Color preview */}
-      <div className="layer-tile-color-wrap" style={{ position: 'relative' }}>
+      <div className="layer-tile-color-wrap">
         <div
+          ref={colorBtnRef}
           className="layer-tile-color-preview"
           style={{ backgroundColor: layer.inkColor.hex }}
           title={layer.inkColor.name}
           onClick={() => setShowPicker((v) => !v)}
         />
-        {showPicker && (
-          <div style={{ position: 'absolute', right: 0, top: '100%', zIndex: 100 }}>
+        {showPicker && pickerPos && (
+          <div style={{ position: 'fixed', left: pickerPos.left, top: pickerPos.top, zIndex: 100 }}>
             <ColorPicker
               onSelect={onColorChange}
               onClose={() => setShowPicker(false)}
