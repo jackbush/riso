@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Layer, InkColor } from '../types';
 import { ColorPicker } from './ColorPicker';
-import { toGrayscale } from '../engine/grayscale';
+import { loadImageFile } from '../engine/imageLoader';
 
 const PREVIEW_SIZE = 72;
 
@@ -75,33 +75,10 @@ export function LayerTile({
     const file = e.target.files?.[0];
     if (!file) return;
     setIsLoading(true);
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      const MAX = 6400;
-      if (img.width > MAX || img.height > MAX) {
-        alert(
-          `Image is too large (${img.width}×${img.height}px). ` +
-          `Maximum allowed size is ${MAX}×${MAX}px.`,
-        );
-        URL.revokeObjectURL(url);
-        setIsLoading(false);
-        return;
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) { URL.revokeObjectURL(url); setIsLoading(false); return; }
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, img.width, img.height);
-      const grayscaleData = toGrayscale(imageData);
-      onImageUpload(imageData, grayscaleData);
-      URL.revokeObjectURL(url);
-      setIsLoading(false);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); setIsLoading(false); };
-    img.src = url;
+    loadImageFile(file).then(
+      (result) => { onImageUpload(result.imageData, result.grayscaleData); setIsLoading(false); },
+      (err) => { alert(err instanceof Error ? err.message : 'Failed to load image'); setIsLoading(false); },
+    );
     e.target.value = '';
   }
 

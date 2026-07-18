@@ -13,6 +13,7 @@ function randomInk(): InkColor {
 
 export interface LayerActions {
   addLayer: () => void;
+  addLayerWithImage: (imageData: ImageData, grayscaleData: ImageData) => void;
   removeLayer: (id: string) => void;
   reorderLayers: (activeId: string, overId: string) => void;
   updateLayerName: (id: string, name: string) => void;
@@ -38,6 +39,26 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
         name: `Layer ${n}`,
         imageData: null,
         grayscaleData: null,
+        inkColor: randomInk(),
+        opacity: 1,
+        offsetX: 0,
+        offsetY: 0,
+        visible: true,
+      };
+      return [...prev, newLayer];
+    });
+  }
+
+  function addLayerWithImage(imageData: ImageData, grayscaleData: ImageData) {
+    setLayers((prev) => {
+      if (prev.length >= MAX_LAYERS) return prev;
+      layerCountRef.current += 1;
+      const n = layerCountRef.current;
+      const newLayer: Layer = {
+        id: crypto.randomUUID(),
+        name: `Layer ${n}`,
+        imageData,
+        grayscaleData,
         inkColor: randomInk(),
         opacity: 1,
         offsetX: 0,
@@ -100,6 +121,7 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
   return {
     layers,
     addLayer,
+    addLayerWithImage,
     removeLayer,
     reorderLayers,
     updateLayerName,
