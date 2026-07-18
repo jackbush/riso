@@ -9,8 +9,7 @@ const PREVIEW_SIZE = 72;
 
 interface LayerTileProps {
   layer: Layer;
-  offsetEnabled: boolean;
-  opacityEnabled: boolean;
+  advancedEnabled: boolean;
   paperColor?: string;
   onRemove: () => void;
   onNameChange: (name: string) => void;
@@ -22,8 +21,7 @@ interface LayerTileProps {
 
 export function LayerTile({
   layer,
-  offsetEnabled,
-  opacityEnabled,
+  advancedEnabled,
   paperColor,
   onRemove,
   onNameChange,
@@ -199,24 +197,22 @@ export function LayerTile({
           </button>
         </div>
 
-        {opacityEnabled && (
+        {advancedEnabled && (
           <label className="layer-tile-field-row">
             <span className="layer-tile-field-label">Opacity</span>
             <input
-              type="number"
-              className="layer-tile-field-input"
+              type="range"
+              className="layer-tile-opacity-slider"
               min={0}
               max={100}
+              step={1}
               value={Math.round(layer.opacity * 100)}
-              onChange={(e) => {
-                const v = Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0));
-                onOpacityChange(v / 100);
-              }}
+              onChange={(e) => onOpacityChange(parseInt(e.target.value, 10) / 100)}
             />
           </label>
         )}
 
-        {offsetEnabled && (
+        {advancedEnabled && (
           <div className="layer-tile-field-row">
             <span className="layer-tile-field-label">Offset</span>
             <span className="layer-tile-offset-inputs">

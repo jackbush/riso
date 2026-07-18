@@ -18,9 +18,8 @@ export interface Layer {
 }
 
 export interface RisoConfig {
-  offsetEnabled: boolean;
-  opacityEnabled: boolean;
-  inkTransparencyEnabled: boolean;
+  advancedLayerOptionsEnabled: boolean; // shows per-layer opacity + offset controls; offsets apply when on
+  inkBlendMode: 'km' | 'simple' | 'off'; // km = Kubelka-Munk mixing, simple = per-ink transparency blend, off = flat multiply
   inkSpreadEnabled: boolean;
   inkSpreadAmount: number; // 0-5px at full resolution
   registrationJitterEnabled: boolean;
@@ -30,8 +29,7 @@ export interface RisoConfig {
   halftoneScale: number; // stochastic grain size, 1-6px at full resolution
   halftoneSpacing: number; // AM dot pitch, 4-40px at full resolution
   halftoneAngle: number | null; // AM screen angle in degrees; null = auto per-layer
-  kubelkaMunkEnabled: boolean; // replaces multiply blending entirely when on
-  kubelkaMunkOrderBias: number; // 0-1; extra K/S weight for bottom layers
+  kubelkaMunkOrderBias: number; // 0-1; extra K/S weight for bottom layers (km blend mode only)
   paperColor: string;
   safeArea: number; // pixels at full resolution
 }

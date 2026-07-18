@@ -36,34 +36,32 @@ Pick from presets (White, Eggshell, Natural, Stone, Newsprint) or type any hex c
 
 ### The imperfection toolbox
 
-Real riso is charming *because* it's imperfect. Each effect below is off by default; turn them on and stack them.
+Real riso is charming *because* it's imperfect. Ink blending and halftone are on by default; the rest are off — turn them on and stack them.
 
-**Ink transparency** — real inks aren't equally opaque: Black and Metallic Gold cover what's underneath, while Yellow and Fluorescent Pink are nearly pure dye. Each ink in the palette carries its own measured-ish transparency value; this toggle makes opaque inks partially *hide* lower layers instead of always multiplying into them.
+**Ink blending** — how overlapping inks mix. **Kubelka-Munk** (the default — see below) mixes them like real pigment. **Simple** uses multiply blending weighted by each ink's opacity: Black and Metallic Gold cover what's underneath, while Yellow and Fluorescent Pink are nearly pure dye. **Off** is flat multiply — every ink treated as colored cellophane.
 
 **Ink spread** — riso ink soaks into the paper and spreads slightly past its edges (printers call this dot gain). A little softening (the 0–5 px slider) takes the digital crispness off and makes overlaps feel organic.
 
 **Registration jitter** — every pass through a real riso lands a little differently. This shifts and rotates each layer by a small random amount. The randomness is seeded, so your preview is stable and the export matches it exactly — hit **Re-roll** when you want a different accident.
 
-**Halftone** — riso can't print true grays, only dots of ink. Pick a mode:
+**Halftone** — riso can't print true grays, only dots of ink. Pick a mode (stochastic by default, or turn it off for smooth grays):
 
-| Stochastic | AM (dot screen) |
+| Stochastic | Dot screen |
 |---|---|
 | ![Stochastic halftone gradient](docs/demo-halftone-stochastic.png) | ![AM halftone gradient](docs/demo-halftone-am.png) |
 | Scattered grain, like modern riso output. One slider: grain size. | Classic printshop dots on a rotated grid. Sliders for dot spacing and screen angle. |
 
-In AM mode, leave **Auto angles** on and each layer gets its own screen angle (0°, 15°, 45°, 75°) so overlapping screens don't fight. Turn it off to set one angle manually — and if you *want* moiré as a texture, setting two layers to nearly the same angle is how you get it.
-
-**Kubelka-Munk mixing** — the big one. See below.
+In dot-screen mode, leave **Auto angles** on and each layer gets its own screen angle (0°, 15°, 45°, 75°) so overlapping screens don't fight. Turn it off to set one angle manually — and if you *want* moiré as a texture, setting two layers to nearly the same angle is how you get it.
 
 ### Kubelka-Munk: making inks mix like actual ink
 
-By default (like nearly every riso simulator), overlaps are computed with *multiply* blending — quick, decent, but it treats ink like colored cellophane. Real pigments both absorb *and scatter* light, and the Kubelka-Munk model from 1931 captures that. The practical difference:
+Nearly every riso simulator computes overlaps with *multiply* blending — quick, decent, but it treats ink like colored cellophane. Real pigments both absorb *and scatter* light, and the Kubelka-Munk model from 1931 captures that. It's the default ink blending mode here. The practical difference:
 
 ![Kubelka-Munk vs multiply comparison](docs/demo-km-vs-multiply.png)
 
 Left is Kubelka-Munk, right is multiply — same three inks (Blue, Yellow, Fluorescent Pink). Blue + Yellow makes an actual green. Warm overlaps get richer, and triple overlaps go to deep ink tones instead of instant mud.
 
-When it's on, the **Order bias** slider makes lower layers count slightly more in the mix — ink printed first soaks deeper into the paper. Kubelka-Munk replaces multiply blending entirely, so the ink transparency toggle rests while it's on.
+When it's on, the **Order bias** slider makes lower layers count slightly more in the mix — ink printed first soaks deeper into the paper.
 
 <details>
 <summary><strong>For the color nerds: what's actually computed</strong></summary>
@@ -76,7 +74,7 @@ Honest caveats: doing this per RGB channel is a 3-channel approximation of what 
 
 ### Tips for good fake prints
 
-- Start with **two layers, two inks**, and turn on ink transparency + a little spread + a little jitter. That alone reads as "riso" immediately.
+- Start with **two layers, two inks**, and add a little spread + a little jitter to the defaults. That alone reads as "riso" immediately.
 - Duotone trick: put the *same* photo on two layers and give them different inks and a slight offset.
 - Everything is specified in full-resolution pixels, and the export is what's authoritative — binary halftone dots can shimmer (alias) in the scaled-down preview even when the exported PNG is clean. To judge the real thing, click anywhere on the preview (or hit **100%** in the bottom-left zoom controls) to inspect that spot at true export resolution, one image pixel per physical screen pixel; drag to pan around, click again to zoom back out.
 
@@ -123,7 +121,7 @@ New effects should slot into the pipeline as a stage or a blend path — not as 
 - **The blue-noise matrix is generated, not shipped.** 64×64 void-and-cluster with a fixed seed, built once on first use. Fixed seed ⇒ identical grain in preview and export.
 - **Kubelka-Munk doesn't reimplement geometry.** The KM path rasterizes each layer's *density* onto a white output-sized canvas using the same shared placement code as the multiply path — so resampling, centering, jitter rotation, and opacity (`globalAlpha` over white scales density exactly) come free from `drawImage`. Only the per-pixel mixing loop is hand-written, and it runs in 256-row strips to keep memory bounded at export size.
 - **K/S values are derived from hex at use time** (memoized), not stored in the palette — ink colors are user-customizable, so precomputed coefficients would break custom picks.
-- **Mutual exclusions are modeled in the UI**, not silently resolved: stochastic and AM halftone share one dropdown; KM replaces multiply entirely (and supersedes ink transparency, with a hint); halftone + ink spread stack deliberately, also with a hint.
+- **Mutual exclusions are modeled in the UI**, not silently resolved: the halftone screens share one dropdown, and the three ink blending strategies (Kubelka-Munk, per-ink transparency, flat multiply) share another; halftone + ink spread stack deliberately.
 
 ### Testing
 

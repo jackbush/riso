@@ -128,7 +128,8 @@ body {
 }
 
 .zoom-controls,
-.download-btn {
+.download-btn,
+.reroll-btn {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   border-radius: var(--border-radius);
 }
@@ -161,7 +162,8 @@ body {
   border-left: none;
 }
 
-.download-btn {
+.download-btn,
+.reroll-btn {
   border-radius: var(--border-radius);
 }
 
@@ -297,13 +299,8 @@ body {
   color: #666;
 }
 
+/* Sizing/border come from the shared input rules further down */
 .layer-tile-field-input {
-  width: 48px;
-  padding: 1px 4px;
-  font-size: 0.75rem;
-  font-family: inherit;
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
   text-align: right;
   margin-left: auto;
 }
@@ -368,17 +365,129 @@ body {
   font-style: italic;
 }
 
-input[type='range'],
+/* Text/number inputs: same visual language as the selects */
 input[type='text'],
-input[type='color'] {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
+input[type='number'] {
   font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--color-fg);
+  background-color: #ffffff;
+  border: 1px solid var(--color-fg);
+  border-radius: var(--border-radius);
+  padding: 2px 8px;
 }
 
+/* Native number spinners clash with the flat look — hide them */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Per-layer opacity/offset fields stay compact */
+input.layer-tile-field-input {
+  width: 48px;
+  padding: 2px 4px;
+  font-size: 0.75rem;
+}
+
+/* Sliders: one flat grey line (square ends), round black knob, no blue */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--color-border);
+  border-radius: 0;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -5px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-fg);
+}
+
+input[type='range']::-moz-range-track {
+  height: 2px;
+  background: var(--color-border);
+  border-radius: 0;
+}
+
+input[type='range']::-moz-range-progress {
+  height: 2px;
+  background: var(--color-fg);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-fg);
+}
+
+/* Right-align the per-layer opacity slider in its field row */
+input.layer-tile-opacity-slider {
+  margin-left: auto;
+}
+
+/* Selects: black border, white fill, simple triangle arrow */
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--color-fg);
+  background-color: #ffffff;
+  border: 1px solid var(--color-fg);
+  border-radius: var(--border-radius);
+  padding: 2px 24px 2px 8px;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  cursor: pointer;
+}
+
+/* Checkboxes: square outline matching the selects, black fill when checked */
 input[type='checkbox'] {
-  accent-color: var(--color-accent);
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid var(--color-fg);
+  border-radius: 3px;
+  background-color: #ffffff;
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  flex-shrink: 0;
+}
+
+input[type='checkbox']:checked::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: var(--color-fg);
 }
 
 button {
@@ -445,7 +554,7 @@ button:disabled {
   width: 28px;
   height: 28px;
   border-radius: 3px;
-  border: 1px solid var(--color-border);
+  border: none;
   box-sizing: border-box;
   cursor: pointer;
   transition: transform 0.1s;
@@ -454,7 +563,7 @@ button:disabled {
 }
 
 .color-picker-swatch--active {
-  outline: 2px solid #222;
+  outline: 1px solid var(--color-fg);
   outline-offset: -1px;
   z-index: 1;
 }
@@ -501,6 +610,8 @@ button:disabled {
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
+  /* Uniform row height regardless of the control on the right */
+  min-height: 26px;
 }
 
 .paper-preset-row {
@@ -513,7 +624,7 @@ button:disabled {
   flex: 1;
   height: 28px;
   padding: 0;
-  border: 1px solid #aaa;
+  border: 1px solid var(--color-fg);
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: transform 0.1s;
@@ -535,8 +646,6 @@ button:disabled {
 
 .config-inline-input {
   width: 80px;
-  font-family: inherit;
-  font-size: 0.875rem;
   text-align: right;
 }
 

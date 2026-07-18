@@ -23,7 +23,7 @@ export function SettingsPanel({ layers, actions, config, onConfigChange }: Setti
       <details className="pane" open>
         <summary className="pane-summary">Layers</summary>
         <div className="pane-body">
-          <LayerList layers={layers} actions={actions} offsetEnabled={config.offsetEnabled} opacityEnabled={config.opacityEnabled} paperColor={config.paperColor} />
+          <LayerList layers={layers} actions={actions} advancedEnabled={config.advancedLayerOptionsEnabled} paperColor={config.paperColor} />
         </div>
       </details>
     </div>

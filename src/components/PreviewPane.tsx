@@ -9,6 +9,7 @@ interface PreviewPaneProps {
   zoomMode: ZoomMode;
   onZoomModeChange: (mode: ZoomMode) => void;
   onExport: () => void;
+  onRerollJitter: () => void;
 }
 
 // Pointer movement below this (CSS px) counts as a click, above it as a pan.
@@ -35,6 +36,7 @@ export function PreviewPane({
   zoomMode,
   onZoomModeChange,
   onExport,
+  onRerollJitter,
 }: PreviewPaneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -252,6 +254,11 @@ export function PreviewPane({
           <button type="button" className="zoom-btn download-btn" onClick={onExport}>
             Download ({exportW}×{exportH}px)
           </button>
+          {config.registrationJitterEnabled && (
+            <button type="button" className="zoom-btn reroll-btn" onClick={onRerollJitter}>
+              Re-roll
+            </button>
+          )}
         </div>
       )}
     </div>

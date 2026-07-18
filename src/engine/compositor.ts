@@ -197,7 +197,7 @@ function computeLayerPlacement(
   let drawX = safe + (targetW - drawW) / 2;
   let drawY = safe + (targetH - drawH) / 2;
 
-  if (config.offsetEnabled) {
+  if (config.advancedLayerOptionsEnabled) {
     drawX += layer.offsetX * scale;
     drawY += layer.offsetY * scale;
   }
@@ -255,7 +255,7 @@ export function composite(
   targetH: number,
   fullW: number,
 ): HTMLCanvasElement {
-  if (config.kubelkaMunkEnabled) {
+  if (config.inkBlendMode === 'km') {
     return kmComposite(layers, config, targetW, targetH, fullW);
   }
 
@@ -298,7 +298,7 @@ export function composite(
     ctx.save();
     applyPlacementRotation(ctx, placement);
 
-    if (config.inkTransparencyEnabled) {
+    if (config.inkBlendMode === 'simple') {
       // Blend between pure multiply (transparent, dye-like inks — shows what's
       // beneath) and source-over occlusion by density (opaque inks — hides it).
       const transparency = layer.inkColor.transparency;

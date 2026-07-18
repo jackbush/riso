@@ -67,35 +67,33 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         />
       </label>
 
-      {/* Layer opacity */}
+      {/* Ink blending */}
       <label className="config-item config-item--row">
-        <span className="config-label">Layer opacity</span>
-        <input
-          type="checkbox"
-          checked={config.opacityEnabled}
-          onChange={(e) => onChange({ opacityEnabled: e.target.checked })}
-        />
+        <span className="config-label">Ink blending</span>
+        <select
+          value={config.inkBlendMode}
+          onChange={(e) =>
+            onChange({ inkBlendMode: e.target.value as RisoConfig['inkBlendMode'] })
+          }
+        >
+          <option value="km">Kubelka-Munk</option>
+          <option value="simple">Simple</option>
+          <option value="off">Off</option>
+        </select>
       </label>
-
-      {/* Layer offset */}
-      <label className="config-item config-item--row">
-        <span className="config-label">Layer offset</span>
-        <input
-          type="checkbox"
-          checked={config.offsetEnabled}
-          onChange={(e) => onChange({ offsetEnabled: e.target.checked })}
-        />
-      </label>
-
-      {/* Ink transparency */}
-      <label className="config-item config-item--row">
-        <span className="config-label">Ink transparency</span>
-        <input
-          type="checkbox"
-          checked={config.inkTransparencyEnabled}
-          onChange={(e) => onChange({ inkTransparencyEnabled: e.target.checked })}
-        />
-      </label>
+      {config.inkBlendMode === 'km' && (
+        <label className="config-item config-item--row">
+          <span className="config-label">Order bias</span>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.1}
+            value={config.kubelkaMunkOrderBias}
+            onChange={(e) => onChange({ kubelkaMunkOrderBias: parseFloat(e.target.value) })}
+          />
+        </label>
+      )}
 
       {/* Ink spread */}
       <label className="config-item config-item--row">
@@ -129,9 +127,9 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
             onChange({ halftoneMode: e.target.value as RisoConfig['halftoneMode'] })
           }
         >
-          <option value="off">Off</option>
           <option value="stochastic">Stochastic</option>
-          <option value="am">AM (dot screen)</option>
+          <option value="am">Dot screen</option>
+          <option value="off">Off</option>
         </select>
       </label>
       {config.halftoneMode === 'stochastic' && (
@@ -183,42 +181,6 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
           )}
         </>
       )}
-      {config.halftoneMode !== 'off' && config.inkSpreadEnabled && (
-        <div className="config-item config-hint">
-          Ink spread softens edges before halftoning — the effects stack.
-        </div>
-      )}
-
-      {/* Kubelka-Munk mixing */}
-      <label className="config-item config-item--row">
-        <span className="config-label">Kubelka-Munk mixing</span>
-        <input
-          type="checkbox"
-          checked={config.kubelkaMunkEnabled}
-          onChange={(e) => onChange({ kubelkaMunkEnabled: e.target.checked })}
-        />
-      </label>
-      {config.kubelkaMunkEnabled && (
-        <>
-          <label className="config-item config-item--row">
-            <span className="config-label">Order bias</span>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.1}
-              value={config.kubelkaMunkOrderBias}
-              onChange={(e) => onChange({ kubelkaMunkOrderBias: parseFloat(e.target.value) })}
-            />
-          </label>
-          {config.inkTransparencyEnabled && (
-            <div className="config-item config-hint">
-              Kubelka-Munk replaces multiply blending — the ink transparency
-              setting has no effect while it's on.
-            </div>
-          )}
-        </>
-      )}
 
       {/* Registration jitter */}
       <label className="config-item config-item--row">
@@ -230,29 +192,28 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         />
       </label>
       {config.registrationJitterEnabled && (
-        <>
-          <label className="config-item config-item--row">
-            <span className="config-label">Jitter amount (px)</span>
-            <input
-              type="range"
-              min={0}
-              max={10}
-              step={0.5}
-              value={config.registrationJitterAmount}
-              onChange={(e) => onChange({ registrationJitterAmount: parseFloat(e.target.value) })}
-            />
-          </label>
-          <div className="config-item config-item--row">
-            <span className="config-label">Re-roll</span>
-            <button
-              type="button"
-              onClick={() => onChange({ registrationJitterSeed: Math.floor(Math.random() * 2 ** 31) })}
-            >
-              Re-roll
-            </button>
-          </div>
-        </>
+        <label className="config-item config-item--row">
+          <span className="config-label">Jitter amount (px)</span>
+          <input
+            type="range"
+            min={0}
+            max={10}
+            step={0.5}
+            value={config.registrationJitterAmount}
+            onChange={(e) => onChange({ registrationJitterAmount: parseFloat(e.target.value) })}
+          />
+        </label>
       )}
+
+      {/* Advanced layer options */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Advanced layer options</span>
+        <input
+          type="checkbox"
+          checked={config.advancedLayerOptionsEnabled}
+          onChange={(e) => onChange({ advancedLayerOptionsEnabled: e.target.checked })}
+        />
+      </label>
     </>
   );
 }

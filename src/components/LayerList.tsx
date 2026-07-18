@@ -22,12 +22,11 @@ import { loadPdfFile } from '../engine/pdfLoader';
 interface LayerListProps {
   layers: Layer[];
   actions: LayerActions;
-  offsetEnabled: boolean;
-  opacityEnabled: boolean;
+  advancedEnabled: boolean;
   paperColor?: string;
 }
 
-export function LayerList({ layers, actions, offsetEnabled, opacityEnabled, paperColor }: LayerListProps) {
+export function LayerList({ layers, actions, advancedEnabled, paperColor }: LayerListProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sensors = useSensors(
@@ -74,8 +73,7 @@ export function LayerList({ layers, actions, offsetEnabled, opacityEnabled, pape
             <LayerTile
               key={layer.id}
               layer={layer}
-              offsetEnabled={offsetEnabled}
-              opacityEnabled={opacityEnabled}
+              advancedEnabled={advancedEnabled}
               paperColor={paperColor}
               onRemove={() => actions.removeLayer(layer.id)}
               onNameChange={(name: string) => actions.updateLayerName(layer.id, name)}

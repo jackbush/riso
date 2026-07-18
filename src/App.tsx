@@ -16,19 +16,17 @@ export function App() {
   const [zoomMode, setZoomMode] = useState<ZoomMode>('fit');
 
   const [config, setConfig] = useState<RisoConfig>({
-    offsetEnabled: false,
-    opacityEnabled: false,
-    inkTransparencyEnabled: false,
+    advancedLayerOptionsEnabled: false,
+    inkBlendMode: 'km',
     inkSpreadEnabled: false,
     inkSpreadAmount: 1.5,
     registrationJitterEnabled: false,
     registrationJitterAmount: 2,
     registrationJitterSeed: 1,
-    halftoneMode: 'off',
+    halftoneMode: 'stochastic',
     halftoneScale: 2,
     halftoneSpacing: 8,
     halftoneAngle: null,
-    kubelkaMunkEnabled: false,
     kubelkaMunkOrderBias: 0.3,
     paperColor: '#FFFDF5',
     safeArea: 0,
@@ -93,6 +91,9 @@ export function App() {
         zoomMode={zoomMode}
         onZoomModeChange={setZoomMode}
         onExport={() => exportFullRes(layers, config)}
+        onRerollJitter={() =>
+          handleConfigChange({ registrationJitterSeed: Math.floor(Math.random() * 2 ** 31) })
+        }
       />
       <SettingsPanel
         layers={layers}
