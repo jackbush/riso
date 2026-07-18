@@ -101,7 +101,7 @@ export function LayerList({ layers, actions, offsetEnabled, opacityEnabled }: La
         disabled={layers.length >= MAX_LAYERS}
         style={{ marginTop: 'auto' }}
       >
-        {layers.length >= MAX_LAYERS ? 'Max layers reached' : '+ Add layers'}
+        {layers.length >= MAX_LAYERS ? 'Max layers reached' : 'Add layers'}
       </button>
     </div>
   );
