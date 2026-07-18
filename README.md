@@ -14,7 +14,7 @@ Drop in some images, stack them up as ink layers, and watch them overprint with 
 
 Layers turn grayscale on import: dark areas become heavy ink, light areas become bare paper. It's how a real riso sees your artwork, one colour separation at a time. Drag the handle to reorder layers (they print bottom to top), click the name to rename, click the thumbnail to swap the image.
 
-## The settings
+### The settings
 
 - **Paper size** — sized to your largest layer by default. *Smallest layer* crops everything down to it; *Zine* (A3 landscape) and *Drawing* (A4 portrait) are fixed 300dpi sheets.
 - **Paper color** — riso ink is translucent, so the paper glows through everything. The same print reads completely differently on Newsprint than on White.
@@ -40,7 +40,7 @@ npm test         # vitest
 npm run build    # tsc + vite build
 ```
 
-## Density pipeline
+### Density pipeline
 Each stage is a pure function over grayscale "ink density" `ImageData` that no-ops when its feature is off:
 
 ```
@@ -49,7 +49,7 @@ upload → toGrayscale ─→ spread (blur.ts) ─→ halftone (halftone.ts) ─
                                                                       └─ Kubelka-Munk path (kubelkaMunk.ts)
 ```
 
-### Things worth knowing
+#### Things worth knowing
 
 - **Everything is full-resolution pixels, no DPI anywhere.** Effects run on full-res data *before* the preview downscale — never scale an effect radius by render scale, that double-applies it.
 - **Randomness is always seeded**, keyed by layer id (not index, so reordering doesn't reshuffle jitter). The export reuses the preview's seed and matches it exactly.
