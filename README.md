@@ -32,7 +32,7 @@ Every layer is converted to grayscale on import — dark areas become heavy ink,
 
 ### Paper
 
-Pick from presets (White, Eggshell, Natural, Stone, Newsprint) or type any hex color. Riso inks are translucent, so the paper glows through everything — the same print reads completely differently on newsprint than on bright white. **Paper size** resolves differently-sized layers to one sheet: the largest layer's dimensions (default) or an intersection crop to the smallest. **Margin** adds extra paper around the artwork. **Safe area** keeps ink away from the paper edge — nothing prints within that distance of the rim (jitter and offsets included), emulating a risograph's unprintable edge.
+Pick from presets (White, Eggshell, Natural, Stone, Newsprint) or type any hex color. Riso inks are translucent, so the paper glows through everything — the same print reads completely differently on newsprint than on bright white. **Paper size** resolves differently-sized layers to one sheet: the largest layer's dimensions (default), an intersection crop to the smallest, or a fixed sheet at 300dpi — Zine (A3 landscape) or Drawing (A4 portrait). **Margin** adds extra paper around the artwork. **Safe area** keeps ink away from the paper edge — nothing prints within that distance of the rim (jitter and offsets included), emulating a risograph's unprintable edge.
 
 ### The imperfection toolbox
 

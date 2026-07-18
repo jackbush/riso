@@ -19,6 +19,7 @@ export interface LayerActions {
   updateLayerName: (id: string, name: string) => void;
   updateLayerColor: (id: string, inkColor: InkColor) => void;
   updateLayerOpacity: (id: string, opacity: number) => void;
+  updateLayerScale: (id: string, scale: number) => void;
   updateLayerOffset: (id: string, x: number, y: number) => void;
   setLayerImage: (id: string, imageData: ImageData, grayscaleData: ImageData) => void;
   toggleLayerVisible: (id: string) => void;
@@ -41,6 +42,7 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
         grayscaleData: null,
         inkColor: randomInk(),
         opacity: 1,
+        scale: 1,
         offsetX: 0,
         offsetY: 0,
         visible: true,
@@ -61,6 +63,7 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
         grayscaleData,
         inkColor: randomInk(),
         opacity: 1,
+        scale: 1,
         offsetX: 0,
         offsetY: 0,
         visible: true,
@@ -100,6 +103,12 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
     );
   }
 
+  function updateLayerScale(id: string, scale: number) {
+    setLayers((prev) =>
+      prev.map((l) => (l.id === id ? { ...l, scale } : l))
+    );
+  }
+
   function updateLayerOffset(id: string, x: number, y: number) {
     setLayers((prev) =>
       prev.map((l) => (l.id === id ? { ...l, offsetX: x, offsetY: y } : l))
@@ -127,6 +136,7 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
     updateLayerName,
     updateLayerColor,
     updateLayerOpacity,
+    updateLayerScale,
     updateLayerOffset,
     setLayerImage,
     toggleLayerVisible,

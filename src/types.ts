@@ -12,6 +12,7 @@ export interface Layer {
   grayscaleData: ImageData | null;
   inkColor: InkColor;
   opacity: number;
+  scale: number; // 1 = native size
   offsetX: number;
   offsetY: number;
   visible: boolean;
@@ -31,7 +32,7 @@ export interface RisoConfig {
   halftoneAngle: number | null; // AM screen angle in degrees; null = auto per-layer
   kubelkaMunkOrderBias: number; // 0-1; extra K/S weight for bottom layers (km blend mode only)
   paperColor: string;
-  paperSize: 'largest' | 'smallest'; // canvas resolves to the largest or smallest layer image
+  paperSize: 'largest' | 'smallest' | 'a3' | 'a4'; // layer-derived, or fixed sheet at 300dpi
   margin: number; // extra paper added around the artwork, px at full resolution
   safeArea: number; // no-ink inset from the paper edge, px at full resolution
 }

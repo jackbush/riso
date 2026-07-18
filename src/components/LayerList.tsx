@@ -79,6 +79,7 @@ export function LayerList({ layers, actions, advancedEnabled, paperColor }: Laye
               onNameChange={(name: string) => actions.updateLayerName(layer.id, name)}
               onColorChange={(ink: InkColor) => actions.updateLayerColor(layer.id, ink)}
               onOpacityChange={(opacity: number) => actions.updateLayerOpacity(layer.id, opacity)}
+              onScaleChange={(scale: number) => actions.updateLayerScale(layer.id, scale)}
               onOffsetChange={(x: number, y: number) => actions.updateLayerOffset(layer.id, x, y)}
               onImageUpload={(imageData: ImageData, grayscaleData: ImageData) =>
                 actions.setLayerImage(layer.id, imageData, grayscaleData)

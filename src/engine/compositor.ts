@@ -192,8 +192,9 @@ function computeLayerPlacement(
   targetH: number,
   margin: number,
 ): LayerPlacement {
-  const drawW = srcW * scale;
-  const drawH = srcH * scale;
+  const layerScale = config.advancedLayerOptionsEnabled ? layer.scale : 1;
+  const drawW = srcW * scale * layerScale;
+  const drawH = srcH * scale * layerScale;
   let drawX = margin + (targetW - drawW) / 2;
   let drawY = margin + (targetH - drawH) / 2;
 
@@ -224,12 +225,12 @@ function computeLayerPlacement(
  * Binary halftone dots drawn at 1:1 scale must be point-sampled, not
  * interpolated: bilinear resampling of a 1-px stipple under the jitter's
  * sub-pixel shift + small rotation beats against the pixel grid and shows up
- * as faint horizontal/vertical moiré bands. At preview scales (< 1) smoothing
- * stays on — nearest-neighbor downscaling would alias far worse, and the
- * export is the authoritative render anyway.
+ * as faint horizontal/vertical moiré bands. At any other effective draw scale
+ * (preview downscale, per-layer scale) smoothing stays on — nearest-neighbor
+ * resampling would alias far worse, and the export is authoritative anyway.
  */
-function crispHalftone(config: RisoConfig, scale: number): boolean {
-  return config.halftoneMode !== 'off' && scale === 1;
+function crispHalftone(config: RisoConfig, effectiveScale: number): boolean {
+  return config.halftoneMode !== 'off' && effectiveScale === 1;
 }
 
 /**
@@ -332,7 +333,7 @@ export function composite(
 
     ctx.save();
     applyPlacementRotation(ctx, placement);
-    ctx.imageSmoothingEnabled = !crispHalftone(config, scale);
+    ctx.imageSmoothingEnabled = !crispHalftone(config, placement.drawW / tinted.width);
 
     if (config.inkBlendMode === 'simple') {
       // Blend between pure multiply (transparent, dye-like inks — shows what's
@@ -434,7 +435,7 @@ function kmComposite(
     // Outside the clip the buffer stays white = zero density = no ink
     applySafeAreaClip(targetCtx, config, scale, width, height);
     applyPlacementRotation(targetCtx, placement);
-    targetCtx.imageSmoothingEnabled = !crispHalftone(config, scale);
+    targetCtx.imageSmoothingEnabled = !crispHalftone(config, placement.drawW / density.width);
     targetCtx.globalAlpha = layer.opacity;
     targetCtx.drawImage(tmp, placement.drawX, placement.drawY, placement.drawW, placement.drawH);
     targetCtx.restore();

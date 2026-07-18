@@ -27,6 +27,7 @@ function makeLayer(overrides: Partial<Layer> = {}): Layer {
     grayscaleData: null,
     inkColor: { name: 'Black', hex: '#000000', transparency: 0.15 },
     opacity: 1,
+    scale: 1,
     offsetX: 0,
     offsetY: 0,
     visible: true,

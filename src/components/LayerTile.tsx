@@ -5,7 +5,7 @@ import { Layer, InkColor } from '../types';
 import { ColorPicker } from './ColorPicker';
 import { loadImageFile } from '../engine/imageLoader';
 
-const PREVIEW_SIZE = 72;
+const PREVIEW_SIZE = 86;
 
 interface LayerTileProps {
   layer: Layer;
@@ -15,6 +15,7 @@ interface LayerTileProps {
   onNameChange: (name: string) => void;
   onColorChange: (inkColor: InkColor) => void;
   onOpacityChange: (opacity: number) => void;
+  onScaleChange: (scale: number) => void;
   onOffsetChange: (x: number, y: number) => void;
   onImageUpload: (imageData: ImageData, grayscaleData: ImageData) => void;
 }
@@ -27,6 +28,7 @@ export function LayerTile({
   onNameChange,
   onColorChange,
   onOpacityChange,
+  onScaleChange,
   onOffsetChange,
   onImageUpload,
 }: LayerTileProps) {
@@ -208,6 +210,21 @@ export function LayerTile({
               step={1}
               value={Math.round(layer.opacity * 100)}
               onChange={(e) => onOpacityChange(parseInt(e.target.value, 10) / 100)}
+            />
+          </label>
+        )}
+
+        {advancedEnabled && (
+          <label className="layer-tile-field-row">
+            <span className="layer-tile-field-label">Scale</span>
+            <input
+              type="range"
+              className="layer-tile-opacity-slider"
+              min={10}
+              max={200}
+              step={1}
+              value={Math.round(layer.scale * 100)}
+              onChange={(e) => onScaleChange(parseInt(e.target.value, 10) / 100)}
             />
           </label>
         )}

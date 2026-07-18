@@ -47,6 +47,8 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         >
           <option value="largest">Largest layer</option>
           <option value="smallest">Smallest layer</option>
+          <option value="a3">Zine (A3 300dpi)</option>
+          <option value="a4">Drawing (A4 300dpi)</option>
         </select>
       </label>
 

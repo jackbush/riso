@@ -5,19 +5,28 @@ const MAX_DIMENSION = 6400;
 const DEFAULT_WIDTH = 800;
 const DEFAULT_HEIGHT = 600;
 
+// Fixed sheets at 300dpi: zine spread (A3 landscape), drawing (A4 portrait)
+const FIXED_PAPER_SIZES: Record<'a3' | 'a4', { width: number; height: number }> = {
+  a4: { width: 2480, height: 3508 }, // 210 × 297 mm portrait
+  a3: { width: 4961, height: 3508 }, // 420 × 297 mm landscape
+};
+
 /**
- * Compute composite canvas dimensions from the layer images: the largest
- * layer's per-axis extents, or the smallest's (an intersection crop — layers
- * are centered, so larger images crop equally on all sides).
- * Caps at 6400 per axis. Returns 800×600 if no layers have images.
+ * Compute composite canvas dimensions: a fixed sheet size, or derived from
+ * the layer images — the largest layer's per-axis extents, or the smallest's
+ * (an intersection crop — layers are centered, so larger images crop equally
+ * on all sides). Caps at 6400 per axis. Returns 800×600 if size is
+ * layer-derived and no layers have images.
  */
 export function getCompositeDimensions(
   layers: Layer[],
-  paperSize: 'largest' | 'smallest' = 'largest',
+  paperSize: RisoConfig['paperSize'] = 'largest',
 ): {
   width: number;
   height: number;
 } {
+  if (paperSize === 'a3' || paperSize === 'a4') return { ...FIXED_PAPER_SIZES[paperSize] };
+
   let w = 0;
   let h = 0;
   const pick = paperSize === 'smallest' ? Math.min : Math.max;

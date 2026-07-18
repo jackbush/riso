@@ -221,15 +221,15 @@ body {
 }
 
 .layer-tile-preview-wrap {
-  width: 72px;
-  height: 72px;
+  width: 86px;
+  height: 86px;
   flex-shrink: 0;
   cursor: pointer;
 }
 
 .layer-tile-preview {
-  width: 72px;
-  height: 72px;
+  width: 86px;
+  height: 86px;
   background-color: #e8e8e8;
   border-radius: var(--border-radius);
   border: 1px solid #333333;
@@ -240,8 +240,8 @@ body {
 }
 
 .layer-tile-color-preview {
-  width: 36px;
-  height: 72px;
+  width: 28px;
+  height: 86px;
   flex-shrink: 0;
   border-radius: var(--border-radius);
   border: 1px solid #333333;
@@ -392,7 +392,7 @@ input[type='number'] {
 /* Per-layer opacity/offset fields stay compact */
 input.layer-tile-field-input {
   width: 48px;
-  padding: 2px 4px;
+  padding: 1px 4px;
   font-size: 0.75rem;
 }
 
@@ -687,8 +687,8 @@ button:disabled {
 
 /* Layer tile loading state */
 .layer-tile-loading {
-  width: 72px;
-  height: 72px;
+  width: 86px;
+  height: 86px;
   border-radius: var(--border-radius);
   border: 2px solid var(--color-border);
   border-top-color: var(--color-accent);
