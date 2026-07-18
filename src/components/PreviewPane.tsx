@@ -24,7 +24,7 @@ export function PreviewPane({ layers, config }: PreviewPaneProps) {
     <div className="preview-pane" ref={containerRef}>
       {!canvasReady && (
         <div className="preview-empty">
-          <p>Add a layer and upload an image to get started.</p>
+          <p>Add layers to get started.</p>
         </div>
       )}
       <canvas

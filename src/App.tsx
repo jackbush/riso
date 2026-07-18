@@ -1,14 +1,18 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { PreviewPane } from './components/PreviewPane';
 import { SettingsPanel } from './components/SettingsPanel';
-import { useLayerState } from './hooks/useLayerState';
+import { useLayerState, MAX_LAYERS } from './hooks/useLayerState';
 import { exportFullRes } from './engine/renderer';
 import { loadImageFile } from './engine/imageLoader';
+import { loadPdfFile } from './engine/pdfLoader';
 import { RisoConfig } from './types';
 import './index.css';
 
 export function App() {
   const { layers, ...actions } = useLayerState();
+  const layersRef = useRef(layers);
+  layersRef.current = layers;
+
   const [config, setConfig] = useState<RisoConfig>({
     offsetEnabled: false,
     opacityEnabled: false,
@@ -29,11 +33,17 @@ export function App() {
       if (!files) return;
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        if (!file.type.startsWith('image/')) continue;
-        loadImageFile(file).then(
-          (result) => actions.addLayerWithImage(result.imageData, result.grayscaleData),
-          (err) => alert(err instanceof Error ? err.message : 'Failed to load image'),
-        );
+        if (file.type === 'application/pdf') {
+          loadPdfFile(file, layersRef.current.length, MAX_LAYERS).then(
+            (pages) => pages.forEach((p) => actions.addLayerWithImage(p.imageData, p.grayscaleData)),
+            (err) => alert(err instanceof Error ? err.message : 'Failed to load PDF'),
+          );
+        } else if (file.type.startsWith('image/')) {
+          loadImageFile(file).then(
+            (result) => actions.addLayerWithImage(result.imageData, result.grayscaleData),
+            (err) => alert(err instanceof Error ? err.message : 'Failed to load image'),
+          );
+        }
       }
     },
     [actions],
@@ -62,7 +72,7 @@ export function App() {
 
   return (
     <div className="app">
-      {isDragOver && <div className="drop-overlay">Drop image to add layer</div>}
+      {isDragOver && <div className="drop-overlay">Drop image or PDF to add layers</div>}
       <PreviewPane layers={layers} config={config} />
       <SettingsPanel
         layers={layers}

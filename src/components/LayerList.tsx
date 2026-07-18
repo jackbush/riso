@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -13,10 +14,10 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { Layer, InkColor } from '../types';
-import { LayerActions } from '../hooks/useLayerState';
+import { LayerActions, MAX_LAYERS } from '../hooks/useLayerState';
 import { LayerTile } from './LayerTile';
-
-const MAX_LAYERS = 7;
+import { loadImageFile } from '../engine/imageLoader';
+import { loadPdfFile } from '../engine/pdfLoader';
 
 interface LayerListProps {
   layers: Layer[];
@@ -26,6 +27,8 @@ interface LayerListProps {
 }
 
 export function LayerList({ layers, actions, offsetEnabled, opacityEnabled }: LayerListProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -36,6 +39,26 @@ export function LayerList({ layers, actions, offsetEnabled, opacityEnabled }: La
     if (over && active.id !== over.id) {
       actions.reorderLayers(String(active.id), String(over.id));
     }
+  }
+
+  function handleFilesSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files) return;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.type === 'application/pdf') {
+        loadPdfFile(file, layers.length, MAX_LAYERS).then(
+          (pages) => pages.forEach((p) => actions.addLayerWithImage(p.imageData, p.grayscaleData)),
+          (err) => alert(err instanceof Error ? err.message : 'Failed to load PDF'),
+        );
+      } else if (file.type.startsWith('image/')) {
+        loadImageFile(file).then(
+          (result) => actions.addLayerWithImage(result.imageData, result.grayscaleData),
+          (err) => alert(err instanceof Error ? err.message : 'Failed to load image'),
+        );
+      }
+    }
+    e.target.value = '';
   }
 
   return (
@@ -65,12 +88,20 @@ export function LayerList({ layers, actions, offsetEnabled, opacityEnabled }: La
         </SortableContext>
       </DndContext>
 
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,application/pdf"
+        multiple
+        style={{ display: 'none' }}
+        onChange={handleFilesSelected}
+      />
       <button
-        onClick={actions.addLayer}
+        onClick={() => fileInputRef.current?.click()}
         disabled={layers.length >= MAX_LAYERS}
         style={{ marginTop: 'auto' }}
       >
-        {layers.length >= MAX_LAYERS ? 'Max layers reached' : '+ Add Layer'}
+        {layers.length >= MAX_LAYERS ? 'Max layers reached' : '+ Add layers'}
       </button>
     </div>
   );
