@@ -25,10 +25,10 @@ beforeAll(() => {
   }
 });
 
-// ─── 1. Upload image → layer stores imageData + grayscaleData ───────────────
+// ─── 1. Upload image → layer stores grayscaleData ────────────────────────────
 
 describe('Upload image smoke', () => {
-  it('setLayerImage stores both imageData and grayscaleData on the correct layer', () => {
+  it('setLayerImage stores grayscaleData on the correct layer', () => {
     const { result } = renderHook(() => useLayerState());
     act(() => {
       result.current.addLayer();
@@ -36,15 +36,13 @@ describe('Upload image smoke', () => {
     });
 
     const [l0] = result.current.layers;
-    const img = new ImageData(200, 150);
     const gray = new ImageData(200, 150);
 
-    act(() => result.current.setLayerImage(l0.id, img, gray));
+    act(() => result.current.setLayerImage(l0.id, gray));
 
-    expect(result.current.layers[0].imageData).toBe(img);
     expect(result.current.layers[0].grayscaleData).toBe(gray);
     // Second layer unaffected
-    expect(result.current.layers[1].imageData).toBeNull();
+    expect(result.current.layers[1].grayscaleData).toBeNull();
   });
 
   it('replacing an image on an existing layer updates data in place', () => {
@@ -52,13 +50,11 @@ describe('Upload image smoke', () => {
     act(() => result.current.addLayer());
 
     const id = result.current.layers[0].id;
-    const first = new ImageData(100, 100);
-    const second = new ImageData(300, 200);
 
-    act(() => result.current.setLayerImage(id, first, new ImageData(100, 100)));
+    act(() => result.current.setLayerImage(id, new ImageData(100, 100)));
     expect(result.current.layers[0].grayscaleData?.width).toBe(100);
 
-    act(() => result.current.setLayerImage(id, second, new ImageData(300, 200)));
+    act(() => result.current.setLayerImage(id, new ImageData(300, 200)));
     expect(result.current.layers[0].grayscaleData?.width).toBe(300);
     expect(result.current.layers).toHaveLength(1); // same layer, updated
   });
@@ -156,11 +152,7 @@ describe('getCompositeDimensions smoke', () => {
     });
 
     act(() =>
-      result.current.setLayerImage(
-        result.current.layers[0].id,
-        new ImageData(1200, 900),
-        new ImageData(1200, 900),
-      ),
+      result.current.setLayerImage(result.current.layers[0].id, new ImageData(1200, 900)),
     );
 
     expect(getCompositeDimensions(result.current.layers)).toEqual({
@@ -173,9 +165,7 @@ describe('getCompositeDimensions smoke', () => {
     const { result } = renderHook(() => useLayerState());
     act(() => result.current.addLayer());
     const id = result.current.layers[0].id;
-    act(() =>
-      result.current.setLayerImage(id, new ImageData(500, 400), new ImageData(500, 400)),
-    );
+    act(() => result.current.setLayerImage(id, new ImageData(500, 400)));
     act(() => result.current.removeLayer(id));
 
     expect(getCompositeDimensions(result.current.layers)).toEqual({

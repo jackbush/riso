@@ -4,8 +4,11 @@ import { CSS } from '@dnd-kit/utilities';
 import { Layer, InkColor } from '../types';
 import { ColorPicker } from './ColorPicker';
 import { loadImageFile } from '../engine/imageLoader';
+import { prefilterForScale } from '../engine/compositor';
 
 const PREVIEW_SIZE = 86;
+
+const clampOffset = (v: number) => Math.min(100, Math.max(-100, v));
 
 interface LayerTileProps {
   layer: Layer;
@@ -17,7 +20,7 @@ interface LayerTileProps {
   onOpacityChange: (opacity: number) => void;
   onScaleChange: (scale: number) => void;
   onOffsetChange: (x: number, y: number) => void;
-  onImageUpload: (imageData: ImageData, grayscaleData: ImageData) => void;
+  onImageUpload: (grayscaleData: ImageData) => void;
 }
 
 export function LayerTile({
@@ -71,12 +74,14 @@ export function LayerTile({
     if (!canvas || !layer.grayscaleData) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const tmp = document.createElement('canvas');
-    tmp.width = layer.grayscaleData.width;
-    tmp.height = layer.grayscaleData.height;
-    tmp.getContext('2d')!.putImageData(layer.grayscaleData, 0, 0);
+    const g = layer.grayscaleData;
+    // Pre-halve before the big downscale, same as the preview compositor —
+    // a single drawImage skip-samples and moirés on halftone-ish imagery
+    const src = prefilterForScale(g, Math.min(PREVIEW_SIZE / g.width, PREVIEW_SIZE / g.height));
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.clearRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
-    ctx.drawImage(tmp, 0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
+    ctx.drawImage(src, 0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
   }, [layer.grayscaleData]);
 
   useEffect(() => {
@@ -99,7 +104,7 @@ export function LayerTile({
     if (!file) return;
     setIsLoading(true);
     loadImageFile(file).then(
-      (result) => { onImageUpload(result.imageData, result.grayscaleData); setIsLoading(false); },
+      (result) => { onImageUpload(result.grayscaleData); setIsLoading(false); },
       (err) => { alert(err instanceof Error ? err.message : 'Failed to load image'); setIsLoading(false); },
     );
     e.target.value = '';
@@ -118,7 +123,18 @@ export function LayerTile({
       </span>
 
       {/* Image preview */}
-      <div className="layer-tile-preview-wrap" onClick={() => fileInputRef.current?.click()}>
+      <div
+        className="layer-tile-preview-wrap"
+        role="button"
+        tabIndex={0}
+        onClick={() => fileInputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
+      >
         {isLoading ? (
           <div className="layer-tile-loading" title="Processing…" />
         ) : (
@@ -134,7 +150,8 @@ export function LayerTile({
 
       {/* Color preview */}
       <div className="layer-tile-color-wrap">
-        <div
+        <button
+          type="button"
           className="layer-tile-color-preview"
           style={{ backgroundColor: layer.inkColor.hex }}
           title={layer.inkColor.name}
@@ -188,7 +205,16 @@ export function LayerTile({
           ) : (
             <span
               className="layer-tile-name"
+              role="button"
+              tabIndex={0}
               onClick={() => { setNameDraft(layer.name); setEditingName(true); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setNameDraft(layer.name);
+                  setEditingName(true);
+                }
+              }}
               title="Click to rename"
             >
               {layer.name}
@@ -240,7 +266,7 @@ export function LayerTile({
                 min={-100}
                 max={100}
                 value={layer.offsetX}
-                onChange={(e) => onOffsetChange(parseInt(e.target.value, 10) || 0, layer.offsetY)}
+                onChange={(e) => onOffsetChange(clampOffset(parseInt(e.target.value, 10) || 0), layer.offsetY)}
               />
               <span className="layer-tile-field-label">Y</span>
               <input
@@ -249,7 +275,7 @@ export function LayerTile({
                 min={-100}
                 max={100}
                 value={layer.offsetY}
-                onChange={(e) => onOffsetChange(layer.offsetX, parseInt(e.target.value, 10) || 0)}
+                onChange={(e) => onOffsetChange(layer.offsetX, clampOffset(parseInt(e.target.value, 10) || 0))}
               />
             </span>
           </div>

@@ -48,12 +48,12 @@ export function LayerList({ layers, actions, advancedEnabled, paperColor }: Laye
       const file = files[i];
       if (file.type === 'application/pdf') {
         loadPdfFile(file, layers.length, MAX_LAYERS).then(
-          (pages) => pages.forEach((p) => actions.addLayerWithImage(p.imageData, p.grayscaleData)),
+          (pages) => pages.forEach((p) => actions.addLayerWithImage(p.grayscaleData)),
           (err) => alert(err instanceof Error ? err.message : 'Failed to load PDF'),
         );
       } else if (file.type.startsWith('image/')) {
         loadImageFile(file).then(
-          (result) => actions.addLayerWithImage(result.imageData, result.grayscaleData),
+          (result) => actions.addLayerWithImage(result.grayscaleData),
           (err) => alert(err instanceof Error ? err.message : 'Failed to load image'),
         );
       }
@@ -81,8 +81,8 @@ export function LayerList({ layers, actions, advancedEnabled, paperColor }: Laye
               onOpacityChange={(opacity: number) => actions.updateLayerOpacity(layer.id, opacity)}
               onScaleChange={(scale: number) => actions.updateLayerScale(layer.id, scale)}
               onOffsetChange={(x: number, y: number) => actions.updateLayerOffset(layer.id, x, y)}
-              onImageUpload={(imageData: ImageData, grayscaleData: ImageData) =>
-                actions.setLayerImage(layer.id, imageData, grayscaleData)
+              onImageUpload={(grayscaleData: ImageData) =>
+                actions.setLayerImage(layer.id, grayscaleData)
               }
             />
           ))}

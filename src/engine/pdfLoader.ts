@@ -10,7 +10,6 @@ const MAX_PX = 6400;
 const DEFAULT_SCALE = 2;
 
 export interface PageResult {
-  imageData: ImageData;
   grayscaleData: ImageData;
 }
 
@@ -53,9 +52,8 @@ export async function loadPdfFile(
 
     await page.render({ canvas, canvasContext: ctx, viewport }).promise;
 
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const grayscaleData = toGrayscale(imageData);
-    results.push({ imageData, grayscaleData });
+    const grayscaleData = toGrayscale(ctx.getImageData(0, 0, canvas.width, canvas.height));
+    results.push({ grayscaleData });
     page.cleanup();
   }
 

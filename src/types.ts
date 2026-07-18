@@ -8,7 +8,6 @@ export interface InkColor {
 export interface Layer {
   id: string;
   name: string;
-  imageData: ImageData | null;
   grayscaleData: ImageData | null;
   inkColor: InkColor;
   opacity: number;

@@ -123,10 +123,17 @@ export function useRenderPipeline(
           currentLayers,
           configRef.current.paperSize,
         );
-        // Scale to fit container (with padding so canvas doesn't touch edges)
+        // Scale to fit container (with padding so canvas doesn't touch
+        // edges). The composite comes back margin-inflated, so fit against
+        // paper size (content + 2 × margin), not just the content.
         const rect = container.getBoundingClientRect();
         const padding = 32;
-        scale = Math.min((rect.width - padding) / fullW, (rect.height - padding) / fullH, 1);
+        const margin2 = 2 * (configRef.current.margin ?? 0);
+        scale = Math.min(
+          (rect.width - padding) / (fullW + margin2),
+          (rect.height - padding) / (fullH + margin2),
+          1,
+        );
       }
 
       resultRef.current = render(currentLayers, configRef.current, scale);

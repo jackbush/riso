@@ -103,7 +103,9 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
           max={500}
           step={10}
           value={config.margin}
-          onChange={(e) => onChange({ margin: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+          onChange={(e) =>
+            onChange({ margin: Math.min(500, Math.max(0, parseInt(e.target.value, 10) || 0)) })
+          }
           className="config-inline-input"
         />
       </label>
@@ -117,7 +119,9 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
           max={500}
           step={10}
           value={config.safeArea}
-          onChange={(e) => onChange({ safeArea: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+          onChange={(e) =>
+            onChange({ safeArea: Math.min(500, Math.max(0, parseInt(e.target.value, 10) || 0)) })
+          }
           className="config-inline-input"
         />
       </label>

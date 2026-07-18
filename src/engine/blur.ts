@@ -10,18 +10,21 @@ export function densityBoxBlur(density: ImageData, radiusPx: number): ImageData 
   const { width, height, data } = density;
   const count = width * height;
 
-  let luma: Float32Array<ArrayBufferLike> = new Float32Array(count);
-  for (let i = 0; i < count; i++) luma[i] = data[i * 4];
+  // Two buffers ping-pong through the six 1-D passes; the even pass count
+  // lands the final result back in `a`.
+  const a = new Float32Array(count);
+  const b = new Float32Array(count);
+  for (let i = 0; i < count; i++) a[i] = data[i * 4];
 
   for (let pass = 0; pass < 3; pass++) {
-    luma = boxBlurHorizontal(luma, width, height, radius);
-    luma = boxBlurVertical(luma, width, height, radius);
+    boxBlurHorizontal(a, b, width, height, radius);
+    boxBlurVertical(b, a, width, height, radius);
   }
 
   const out = new ImageData(width, height);
   const dst = out.data;
   for (let i = 0; i < count; i++) {
-    const v = Math.round(luma[i]);
+    const v = Math.round(a[i]);
     dst[i * 4] = v;
     dst[i * 4 + 1] = v;
     dst[i * 4 + 2] = v;
@@ -34,8 +37,13 @@ function clampIndex(i: number, max: number): number {
   return i < 0 ? 0 : i > max ? max : i;
 }
 
-function boxBlurHorizontal(src: Float32Array, w: number, h: number, r: number): Float32Array {
-  const out = new Float32Array(src.length);
+function boxBlurHorizontal(
+  src: Float32Array,
+  out: Float32Array,
+  w: number,
+  h: number,
+  r: number,
+): void {
   const windowSize = 2 * r + 1;
 
   for (let y = 0; y < h; y++) {
@@ -51,11 +59,15 @@ function boxBlurHorizontal(src: Float32Array, w: number, h: number, r: number): 
       out[rowStart + x] = sum / windowSize;
     }
   }
-  return out;
 }
 
-function boxBlurVertical(src: Float32Array, w: number, h: number, r: number): Float32Array {
-  const out = new Float32Array(src.length);
+function boxBlurVertical(
+  src: Float32Array,
+  out: Float32Array,
+  w: number,
+  h: number,
+  r: number,
+): void {
   const windowSize = 2 * r + 1;
 
   for (let x = 0; x < w; x++) {
@@ -70,5 +82,4 @@ function boxBlurVertical(src: Float32Array, w: number, h: number, r: number): Fl
       out[y * w + x] = sum / windowSize;
     }
   }
-  return out;
 }

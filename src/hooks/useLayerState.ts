@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Layer, InkColor } from '../types';
 import { INKS } from '../config/inks';
@@ -13,7 +13,7 @@ function randomInk(): InkColor {
 
 export interface LayerActions {
   addLayer: () => void;
-  addLayerWithImage: (imageData: ImageData, grayscaleData: ImageData) => void;
+  addLayerWithImage: (grayscaleData: ImageData) => void;
   removeLayer: (id: string) => void;
   reorderLayers: (activeId: string, overId: string) => void;
   updateLayerName: (id: string, name: string) => void;
@@ -21,7 +21,7 @@ export interface LayerActions {
   updateLayerOpacity: (id: string, opacity: number) => void;
   updateLayerScale: (id: string, scale: number) => void;
   updateLayerOffset: (id: string, x: number, y: number) => void;
-  setLayerImage: (id: string, imageData: ImageData, grayscaleData: ImageData) => void;
+  setLayerImage: (id: string, grayscaleData: ImageData) => void;
   toggleLayerVisible: (id: string) => void;
 }
 
@@ -30,36 +30,14 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
   // Use a ref for the counter so it stays accurate inside functional setLayers callbacks
   const layerCountRef = useRef(0);
 
-  function addLayer() {
-    setLayers((prev) => {
-      if (prev.length >= MAX_LAYERS) return prev;
+  // Every action closes only over setLayers (stable) and refs, so the whole
+  // object can be memoized once — consumers can safely depend on it.
+  const actions = useMemo<LayerActions>(() => {
+    function newLayer(grayscaleData: ImageData | null): Layer {
       layerCountRef.current += 1;
-      const n = layerCountRef.current;
-      const newLayer: Layer = {
+      return {
         id: crypto.randomUUID(),
-        name: `Layer ${n}`,
-        imageData: null,
-        grayscaleData: null,
-        inkColor: randomInk(),
-        opacity: 1,
-        scale: 1,
-        offsetX: 0,
-        offsetY: 0,
-        visible: true,
-      };
-      return [...prev, newLayer];
-    });
-  }
-
-  function addLayerWithImage(imageData: ImageData, grayscaleData: ImageData) {
-    setLayers((prev) => {
-      if (prev.length >= MAX_LAYERS) return prev;
-      layerCountRef.current += 1;
-      const n = layerCountRef.current;
-      const newLayer: Layer = {
-        id: crypto.randomUUID(),
-        name: `Layer ${n}`,
-        imageData,
+        name: `Layer ${layerCountRef.current}`,
         grayscaleData,
         inkColor: randomInk(),
         opacity: 1,
@@ -68,77 +46,63 @@ export function useLayerState(): { layers: Layer[] } & LayerActions {
         offsetY: 0,
         visible: true,
       };
-      return [...prev, newLayer];
-    });
-  }
+    }
 
-  function removeLayer(id: string) {
-    setLayers((prev) => prev.filter((l) => l.id !== id));
-  }
+    return {
+      addLayer() {
+        setLayers((prev) => (prev.length >= MAX_LAYERS ? prev : [...prev, newLayer(null)]));
+      },
 
-  function reorderLayers(activeId: string, overId: string) {
-    setLayers((prev) => {
-      const oldIndex = prev.findIndex((l) => l.id === activeId);
-      const newIndex = prev.findIndex((l) => l.id === overId);
-      if (oldIndex === -1 || newIndex === -1) return prev;
-      return arrayMove(prev, oldIndex, newIndex);
-    });
-  }
+      addLayerWithImage(grayscaleData: ImageData) {
+        setLayers((prev) =>
+          prev.length >= MAX_LAYERS ? prev : [...prev, newLayer(grayscaleData)],
+        );
+      },
 
-  function updateLayerName(id: string, name: string) {
-    setLayers((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, name } : l))
-    );
-  }
+      removeLayer(id: string) {
+        setLayers((prev) => prev.filter((l) => l.id !== id));
+      },
 
-  function updateLayerColor(id: string, inkColor: InkColor) {
-    setLayers((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, inkColor } : l))
-    );
-  }
+      reorderLayers(activeId: string, overId: string) {
+        setLayers((prev) => {
+          const oldIndex = prev.findIndex((l) => l.id === activeId);
+          const newIndex = prev.findIndex((l) => l.id === overId);
+          if (oldIndex === -1 || newIndex === -1) return prev;
+          return arrayMove(prev, oldIndex, newIndex);
+        });
+      },
 
-  function updateLayerOpacity(id: string, opacity: number) {
-    setLayers((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, opacity } : l))
-    );
-  }
+      updateLayerName(id: string, name: string) {
+        setLayers((prev) => prev.map((l) => (l.id === id ? { ...l, name } : l)));
+      },
 
-  function updateLayerScale(id: string, scale: number) {
-    setLayers((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, scale } : l))
-    );
-  }
+      updateLayerColor(id: string, inkColor: InkColor) {
+        setLayers((prev) => prev.map((l) => (l.id === id ? { ...l, inkColor } : l)));
+      },
 
-  function updateLayerOffset(id: string, x: number, y: number) {
-    setLayers((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, offsetX: x, offsetY: y } : l))
-    );
-  }
+      updateLayerOpacity(id: string, opacity: number) {
+        setLayers((prev) => prev.map((l) => (l.id === id ? { ...l, opacity } : l)));
+      },
 
-  function setLayerImage(id: string, imageData: ImageData, grayscaleData: ImageData) {
-    setLayers((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, imageData, grayscaleData } : l))
-    );
-  }
+      updateLayerScale(id: string, scale: number) {
+        setLayers((prev) => prev.map((l) => (l.id === id ? { ...l, scale } : l)));
+      },
 
-  function toggleLayerVisible(id: string) {
-    setLayers((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, visible: !l.visible } : l))
-    );
-  }
+      updateLayerOffset(id: string, x: number, y: number) {
+        setLayers((prev) =>
+          prev.map((l) => (l.id === id ? { ...l, offsetX: x, offsetY: y } : l)),
+        );
+      },
 
-  return {
-    layers,
-    addLayer,
-    addLayerWithImage,
-    removeLayer,
-    reorderLayers,
-    updateLayerName,
-    updateLayerColor,
-    updateLayerOpacity,
-    updateLayerScale,
-    updateLayerOffset,
-    setLayerImage,
-    toggleLayerVisible,
-  };
+      setLayerImage(id: string, grayscaleData: ImageData) {
+        setLayers((prev) => prev.map((l) => (l.id === id ? { ...l, grayscaleData } : l)));
+      },
+
+      toggleLayerVisible(id: string) {
+        setLayers((prev) => prev.map((l) => (l.id === id ? { ...l, visible: !l.visible } : l)));
+      },
+    };
+  }, []);
+
+  return { layers, ...actions };
 }

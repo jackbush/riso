@@ -2,7 +2,7 @@ import { hexToRgb } from './compositor';
 
 /**
  * Kubelka-Munk spectral mixing, approximated per RGB channel (a 3-channel
- * approximation, not truly spectral — see tasks/todo.md Phase 5).
+ * approximation, not truly spectral — see README, "Kubelka-Munk" section).
  *
  * Each ink gets a K/S (absorption/scattering) ratio per channel, derived
  * from its hex color by the standard KM inversion. Overprints accumulate
@@ -73,16 +73,25 @@ export function kmMixPixels(
   paperKS: readonly [number, number, number],
   out: Uint8ClampedArray,
 ): void {
+  // Bare-paper pixels (no ink from any layer) all resolve to the same color —
+  // compute it once and skip the three per-channel conversions for them.
+  // Margins, safe areas, and light artwork make this the common case.
+  const paperR = Math.round(reflectanceFromKS(paperKS[0]) * 255);
+  const paperG = Math.round(reflectanceFromKS(paperKS[1]) * 255);
+  const paperB = Math.round(reflectanceFromKS(paperKS[2]) * 255);
+
   const count = out.length / 4;
   for (let p = 0; p < count; p++) {
     const i = p * 4;
     let ksR = paperKS[0];
     let ksG = paperKS[1];
     let ksB = paperKS[2];
+    let inked = false;
 
     for (const layer of layers) {
       const density = (255 - layer.data[i]) / 255;
       if (density > 0) {
+        inked = true;
         const dw = density * layer.weight;
         ksR += dw * layer.ks[0];
         ksG += dw * layer.ks[1];
@@ -90,9 +99,15 @@ export function kmMixPixels(
       }
     }
 
-    out[i] = Math.round(reflectanceFromKS(ksR) * 255);
-    out[i + 1] = Math.round(reflectanceFromKS(ksG) * 255);
-    out[i + 2] = Math.round(reflectanceFromKS(ksB) * 255);
+    if (inked) {
+      out[i] = Math.round(reflectanceFromKS(ksR) * 255);
+      out[i + 1] = Math.round(reflectanceFromKS(ksG) * 255);
+      out[i + 2] = Math.round(reflectanceFromKS(ksB) * 255);
+    } else {
+      out[i] = paperR;
+      out[i + 1] = paperG;
+      out[i + 2] = paperB;
+    }
     out[i + 3] = 255;
   }
 }

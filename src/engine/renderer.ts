@@ -63,17 +63,22 @@ export function render(
 }
 
 /**
- * Render at full resolution and trigger a PNG download.
+ * Render at full resolution and trigger a PNG download. Filename carries a
+ * timestamp so successive exports don't collide.
  */
 export function exportFullRes(layers: Layer[], config: RisoConfig): void {
   const canvas = render(layers, config, 1);
 
   canvas.toBlob((blob) => {
-    if (!blob) return;
+    if (!blob) {
+      alert('Export failed — the browser could not encode a canvas this large.');
+      return;
+    }
+    const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'riso-print.png';
+    a.download = `riso-print-${stamp}.png`;
     a.click();
     URL.revokeObjectURL(url);
   }, 'image/png');

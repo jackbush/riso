@@ -5,10 +5,12 @@ import { KMLayer, kmMixPixels, ksFromHex, orderWeight } from './kubelkaMunk';
 import { computeRegistrationJitter } from './prng';
 
 /**
- * Parse a hex color string to [R, G, B] values (0-255).
+ * Parse a hex color string to [R, G, B] values (0-255). Accepts #RRGGBB and
+ * shorthand #RGB.
  */
 export function hexToRgb(hex: string): [number, number, number] {
-  const h = hex.replace('#', '');
+  let h = hex.replace('#', '');
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
   return [
     parseInt(h.substring(0, 2), 16),
     parseInt(h.substring(2, 4), 16),
@@ -85,6 +87,37 @@ export function tintGrayscaleAlpha(
   return out;
 }
 
+// All pipeline caches share one shape: WeakMap keyed by the stage's *input*
+// ImageData (so removing a layer frees everything), holding a small
+// insertion-ordered Map keyed by the stage parameters. The inner maps are
+// LRU-capped: full-resolution entries run to ~160MB each at the 6400px cap,
+// so dragging a slider across its range must not retain one result per
+// notch — only "wiggle and come back" reuse matters.
+const LRU_CAP = 2;
+
+function lruGet<K, V>(map: Map<K, V>, key: K, compute: () => V): V {
+  const hit = map.get(key);
+  if (hit !== undefined) {
+    // Refresh recency (Maps iterate in insertion order)
+    map.delete(key);
+    map.set(key, hit);
+    return hit;
+  }
+  const value = compute();
+  map.set(key, value);
+  while (map.size > LRU_CAP) map.delete(map.keys().next().value as K);
+  return value;
+}
+
+function cacheFor<K, V>(store: WeakMap<ImageData, Map<K, V>>, input: ImageData): Map<K, V> {
+  let inner = store.get(input);
+  if (!inner) {
+    inner = new Map();
+    store.set(input, inner);
+  }
+  return inner;
+}
+
 // Per-layer cache of spread-blurred density, keyed by blur radius, so the
 // debounced re-render triggered by unrelated config changes (or resizing the
 // preview) doesn't re-blur a full-resolution image every time.
@@ -96,18 +129,9 @@ function applySpreadStage(grayscaleData: ImageData, config: RisoConfig): ImageDa
   const radius = Math.round(config.inkSpreadAmount);
   if (radius <= 0) return grayscaleData;
 
-  let byRadius = spreadCache.get(grayscaleData);
-  if (!byRadius) {
-    byRadius = new Map();
-    spreadCache.set(grayscaleData, byRadius);
-  }
-
-  let blurred = byRadius.get(radius);
-  if (!blurred) {
-    blurred = densityBoxBlur(grayscaleData, radius);
-    byRadius.set(radius, blurred);
-  }
-  return blurred;
+  return lruGet(cacheFor(spreadCache, grayscaleData), radius, () =>
+    densityBoxBlur(grayscaleData, radius),
+  );
 }
 
 // Per-layer cache of halftoned density, keyed by the resolved screen params,
@@ -136,18 +160,23 @@ function applyHalftoneStage(
     compute = () => applyAMHalftone(density, spacing, angle);
   }
 
-  let byKey = halftoneCache.get(density);
-  if (!byKey) {
-    byKey = new Map();
-    halftoneCache.set(density, byKey);
-  }
+  return lruGet(cacheFor(halftoneCache, density), key, compute);
+}
 
-  let result = byKey.get(key);
-  if (!result) {
-    result = compute();
-    byKey.set(key, result);
-  }
-  return result;
+// Tint stage cache (chained on the density output like the halftone cache):
+// re-tinting a full-resolution image on every debounced re-render was the
+// remaining per-render pixel loop in the multiply path.
+const tintCache = new WeakMap<ImageData, Map<string, ImageData>>();
+
+function tintStage(
+  density: ImageData,
+  hex: string,
+  mode: 'multiply' | 'alpha',
+): ImageData {
+  const [r, g, b] = hexToRgb(hex);
+  return lruGet(cacheFor(tintCache, density), `${mode}:${hex}`, () =>
+    mode === 'multiply' ? tintGrayscale(density, r, g, b) : tintGrayscaleAlpha(density, r, g, b),
+  );
 }
 
 /**
@@ -271,19 +300,27 @@ function applyPlacementRotation(ctx: CanvasRenderingContext2D, p: LayerPlacement
  * ≥ 0.5, so the final drawImage filters every source pixel. No-op at scale
  * ≥ 0.5, so 100% view and export are untouched.
  */
-function prefilterForScale(img: ImageData, effectiveScale: number): HTMLCanvasElement {
-  let canvas = imageDataToCanvas(img);
-  for (let s = effectiveScale; s < 0.5; s *= 2) {
-    const half = document.createElement('canvas');
-    half.width = Math.max(1, Math.ceil(canvas.width / 2));
-    half.height = Math.max(1, Math.ceil(canvas.height / 2));
-    const hctx = half.getContext('2d')!;
-    hctx.imageSmoothingEnabled = true;
-    hctx.imageSmoothingQuality = 'high';
-    hctx.drawImage(canvas, 0, 0, half.width, half.height);
-    canvas = half;
-  }
-  return canvas;
+const prefilterCache = new WeakMap<ImageData, Map<number, HTMLCanvasElement>>();
+
+export function prefilterForScale(img: ImageData, effectiveScale: number): HTMLCanvasElement {
+  // Number of halvings needed; every scale in the same octave shares a result
+  let levels = 0;
+  for (let s = effectiveScale; s < 0.5; s *= 2) levels++;
+
+  return lruGet(cacheFor(prefilterCache, img), levels, () => {
+    let canvas = imageDataToCanvas(img);
+    for (let l = 0; l < levels; l++) {
+      const half = document.createElement('canvas');
+      half.width = Math.max(1, Math.ceil(canvas.width / 2));
+      half.height = Math.max(1, Math.ceil(canvas.height / 2));
+      const hctx = half.getContext('2d')!;
+      hctx.imageSmoothingEnabled = true;
+      hctx.imageSmoothingQuality = 'high';
+      hctx.drawImage(canvas, 0, 0, half.width, half.height);
+      canvas = half;
+    }
+    return canvas;
+  });
 }
 
 function imageDataToCanvas(img: ImageData): HTMLCanvasElement {
@@ -338,9 +375,8 @@ export function composite(
     const layer = layers[layerIndex];
     if (!layer.visible || !layer.grayscaleData) continue;
 
-    const [inkR, inkG, inkB] = hexToRgb(layer.inkColor.hex);
     const density = computeDensity(layer.grayscaleData, config, layerIndex);
-    const tinted = tintGrayscale(density, inkR, inkG, inkB);
+    const tinted = tintStage(density, layer.inkColor.hex, 'multiply');
 
     const placement = computeLayerPlacement(
       layer,
@@ -373,7 +409,7 @@ export function composite(
       }
 
       if (transparency < 1) {
-        const alphaTinted = tintGrayscaleAlpha(density, inkR, inkG, inkB);
+        const alphaTinted = tintStage(density, layer.inkColor.hex, 'alpha');
         const tmpAlpha = prefilterForScale(alphaTinted, effScale);
         ctx.globalAlpha = layer.opacity * (1 - transparency);
         ctx.globalCompositeOperation = 'source-over';
@@ -391,9 +427,10 @@ export function composite(
   return canvas;
 }
 
-// Strip height for Kubelka-Munk mixing: bounds JS-heap ImageData copies to
-// (layers + 1) × width × 256 RGBA pixels instead of full-frame buffers,
-// which at the 6400px export cap would otherwise run to hundreds of MB.
+// Strip height for Kubelka-Munk mixing: bounds both the JS-heap ImageData
+// copies (layers + 1 strips) *and* the rasterization canvas to width × 256
+// pixels — at the 6400px export cap, full-frame buffers per layer would
+// otherwise run to hundreds of MB each.
 const KM_STRIP_ROWS = 256;
 
 /**
@@ -401,11 +438,16 @@ const KM_STRIP_ROWS = 256;
  * transparency blending is likewise superseded — KM is the blending model).
  *
  * Geometry is not reimplemented in software: each layer's density map is
- * rasterized by Canvas onto a white, output-sized buffer with the exact same
- * placement (resampling, centering, safe area, offsets, jitter + rotation) as
- * the multiply path. Opacity uses globalAlpha, which over a white background
- * scales density exactly: 255 − (a·src + (1−a)·255) = a·(255 − src). The
- * per-pixel KM math then runs on aligned buffers in row strips.
+ * rasterized by Canvas with the exact same placement (resampling, centering,
+ * safe area, offsets, jitter + rotation) as the multiply path. Opacity uses
+ * globalAlpha, which over a white background scales density exactly:
+ * 255 − (a·src + (1−a)·255) = a·(255 − src).
+ *
+ * Rasterization happens strip by strip into one reused white canvas — the
+ * strip context is translated so the strip sees its slice of the full paper
+ * coordinate space — so peak memory stays bounded by strip size, not
+ * (layers × full frame). The per-pixel KM math then runs on the aligned
+ * strip buffers.
  */
 function kmComposite(
   layers: Layer[],
@@ -429,17 +471,9 @@ function kmComposite(
     if (layers[i].visible && layers[i].grayscaleData) visibleIndices.push(i);
   }
 
-  const rasterized = visibleIndices.map((layerIndex, position) => {
+  const prepared = visibleIndices.map((layerIndex, position) => {
     const layer = layers[layerIndex];
     const density = computeDensity(layer.grayscaleData!, config, layerIndex);
-
-    const target = document.createElement('canvas');
-    target.width = width;
-    target.height = height;
-    const targetCtx = target.getContext('2d')!;
-    targetCtx.fillStyle = '#FFFFFF';
-    targetCtx.fillRect(0, 0, width, height);
-
     const placement = computeLayerPlacement(
       layer,
       config,
@@ -451,36 +485,55 @@ function kmComposite(
       margin,
     );
     const effScale = placement.drawW / density.width;
-    const tmp = prefilterForScale(density, effScale);
-
-    targetCtx.save();
-    // Outside the clip the buffer stays white = zero density = no ink
-    applySafeAreaClip(targetCtx, config, scale, width, height);
-    applyPlacementRotation(targetCtx, placement);
-    targetCtx.imageSmoothingEnabled = !crispHalftone(config, effScale);
-    targetCtx.imageSmoothingQuality = 'high';
-    targetCtx.globalAlpha = layer.opacity;
-    targetCtx.drawImage(tmp, placement.drawX, placement.drawY, placement.drawW, placement.drawH);
-    targetCtx.restore();
-
     return {
-      ctx: targetCtx,
+      src: prefilterForScale(density, effScale),
+      placement,
+      effScale,
+      opacity: layer.opacity,
       ks: ksFromHex(layer.inkColor.hex),
       weight: orderWeight(position, visibleIndices.length, config.kubelkaMunkOrderBias),
     };
   });
 
+  const strip = document.createElement('canvas');
+  strip.width = width;
+  strip.height = KM_STRIP_ROWS;
+  const stripCtx = strip.getContext('2d', { willReadFrequently: true })!;
+
   const paperKS = ksFromHex(config.paperColor);
 
   for (let y0 = 0; y0 < height; y0 += KM_STRIP_ROWS) {
     const rows = Math.min(KM_STRIP_ROWS, height - y0);
-    const strips: KMLayer[] = rasterized.map((r) => ({
-      data: r.ctx.getImageData(0, y0, width, rows).data,
-      ks: r.ks,
-      weight: r.weight,
-    }));
+
+    const kmLayers: KMLayer[] = prepared.map((p) => {
+      stripCtx.save();
+      // White = zero density; also the value outside the safe-area clip
+      stripCtx.fillStyle = '#FFFFFF';
+      stripCtx.fillRect(0, 0, width, rows);
+      // Shift paper space so this strip sees rows y0..y0+rows
+      stripCtx.translate(0, -y0);
+      applySafeAreaClip(stripCtx, config, scale, width, height);
+      applyPlacementRotation(stripCtx, p.placement);
+      stripCtx.imageSmoothingEnabled = !crispHalftone(config, p.effScale);
+      stripCtx.imageSmoothingQuality = 'high';
+      stripCtx.globalAlpha = p.opacity;
+      stripCtx.drawImage(
+        p.src,
+        p.placement.drawX,
+        p.placement.drawY,
+        p.placement.drawW,
+        p.placement.drawH,
+      );
+      stripCtx.restore();
+      return {
+        data: stripCtx.getImageData(0, 0, width, rows).data,
+        ks: p.ks,
+        weight: p.weight,
+      };
+    });
+
     const out = ctx.createImageData(width, rows);
-    kmMixPixels(strips, paperKS, out.data);
+    kmMixPixels(kmLayers, paperKS, out.data);
     ctx.putImageData(out, 0, y0);
   }
 

@@ -23,7 +23,6 @@ function makeLayer(overrides: Partial<Layer> = {}): Layer {
   return {
     id: 'test',
     name: 'Test',
-    imageData: null,
     grayscaleData: null,
     inkColor: { name: 'Black', hex: '#000000', transparency: 0.15 },
     opacity: 1,

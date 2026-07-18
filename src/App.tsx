@@ -49,12 +49,12 @@ export function App() {
         const file = files[i];
         if (file.type === 'application/pdf') {
           loadPdfFile(file, layersRef.current.length, MAX_LAYERS).then(
-            (pages) => pages.forEach((p) => actions.addLayerWithImage(p.imageData, p.grayscaleData)),
+            (pages) => pages.forEach((p) => actions.addLayerWithImage(p.grayscaleData)),
             (err) => alert(err instanceof Error ? err.message : 'Failed to load PDF'),
           );
         } else if (file.type.startsWith('image/')) {
           loadImageFile(file).then(
-            (result) => actions.addLayerWithImage(result.imageData, result.grayscaleData),
+            (result) => actions.addLayerWithImage(result.grayscaleData),
             (err) => alert(err instanceof Error ? err.message : 'Failed to load image'),
           );
         }
