@@ -199,29 +199,26 @@ body {
 .layer-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
   min-height: 0;
 }
 
+/* Top/bottom breathing room lives INSIDE the scroller (not on the pane body
+   or as flex gap) so mid-scroll content clips flush against the pane's top
+   border and the add button, while the resting/fully-scrolled positions keep
+   their spacing. */
 .layer-list-items {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
   overflow-y: auto;
   min-height: 0;
+  padding-top: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  scrollbar-width: none;
 }
 
 .layer-list-items::-webkit-scrollbar {
-  width: 6px;
-}
-
-.layer-list-items::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.layer-list-items::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
+  display: none;
 }
 
 .layer-list-add-btn {
@@ -401,6 +398,9 @@ body {
   flex: 0 1 auto;
   min-height: 0;
   overflow: hidden;
+  /* The scroller carries its own top spacing so scrolled content clips at the
+     border. */
+  padding-top: 0;
 }
 
 .config-item {
