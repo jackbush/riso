@@ -189,35 +189,50 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  overflow-y: auto;
+  overflow: hidden;
+  min-height: 0;
   /* Stay above the zoom-transition overlay (z 15) in both zoom modes */
   position: relative;
   z-index: 20;
-}
-
-.settings-panel::-webkit-scrollbar {
-  width: 6px;
-}
-
-.settings-panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.settings-panel::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
 }
 
 .layer-list {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  min-height: 0;
+}
+
+.layer-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.layer-list-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.layer-list-items::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.layer-list-items::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.layer-list-add-btn {
+  flex-shrink: 0;
 }
 
 .layer-tile {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  flex-shrink: 0;
 }
 
 .layer-tile-preview-wrap {
@@ -348,6 +363,44 @@ body {
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
   border-top: 1px solid #333333;
+}
+
+/* Settings pane keeps its natural size always — it never gives up space to
+   the layers pane below it. */
+.pane--settings {
+  flex-shrink: 0;
+}
+
+/* Layers pane: sized to its content (grows as layers are added) but never
+   beyond the space left in the sidebar. Once the settings pane above has
+   claimed its natural size, any remaining content height is squeezed out of
+   this pane via flex-shrink, which in turn squeezes .layer-list-items (the
+   only shrinkable child) so it — not the pane itself — becomes the thing
+   that scrolls, leaving the "Add layers" button always visible at the
+   bottom. */
+.pane--layers {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pane--layers > .pane-summary {
+  flex-shrink: 0;
+}
+
+/* Chrome wraps <details> content in a ::details-content pseudo-element, which
+   blocks the flex shrink chain from reaching .pane-body. Flatten it away while
+   open (only while open — the closed state relies on this box to hide the
+   content) so .pane-body participates directly in the pane's flex layout. */
+.pane--layers[open]::details-content {
+  display: contents;
+}
+
+.pane--layers > .pane-body {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .config-item {

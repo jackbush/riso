@@ -13,14 +13,14 @@ interface SettingsPanelProps {
 export function SettingsPanel({ layers, actions, config, onConfigChange }: SettingsPanelProps) {
   return (
     <div className="settings-panel">
-      <details className="pane" open>
+      <details className="pane pane--settings" open>
         <summary className="pane-summary">Settings</summary>
         <div className="pane-body">
           <ConfigPanel config={config} onChange={onConfigChange} />
         </div>
       </details>
 
-      <details className="pane" open>
+      <details className="pane pane--layers" open>
         <summary className="pane-summary">Layers</summary>
         <div className="pane-body">
           <LayerList layers={layers} actions={actions} advancedEnabled={config.advancedLayerOptionsEnabled} paperColor={config.paperColor} />

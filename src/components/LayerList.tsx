@@ -63,31 +63,33 @@ export function LayerList({ layers, actions, advancedEnabled, paperColor }: Laye
 
   return (
     <div className="layer-list">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={layers.map((l) => l.id)} strategy={verticalListSortingStrategy}>
-          {layers.map((layer) => (
-            <LayerTile
-              key={layer.id}
-              layer={layer}
-              advancedEnabled={advancedEnabled}
-              paperColor={paperColor}
-              onRemove={() => actions.removeLayer(layer.id)}
-              onNameChange={(name: string) => actions.updateLayerName(layer.id, name)}
-              onColorChange={(ink: InkColor) => actions.updateLayerColor(layer.id, ink)}
-              onOpacityChange={(opacity: number) => actions.updateLayerOpacity(layer.id, opacity)}
-              onScaleChange={(scale: number) => actions.updateLayerScale(layer.id, scale)}
-              onOffsetChange={(x: number, y: number) => actions.updateLayerOffset(layer.id, x, y)}
-              onImageUpload={(grayscaleData: ImageData) =>
-                actions.setLayerImage(layer.id, grayscaleData)
-              }
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+      <div className="layer-list-items">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={layers.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+            {layers.map((layer) => (
+              <LayerTile
+                key={layer.id}
+                layer={layer}
+                advancedEnabled={advancedEnabled}
+                paperColor={paperColor}
+                onRemove={() => actions.removeLayer(layer.id)}
+                onNameChange={(name: string) => actions.updateLayerName(layer.id, name)}
+                onColorChange={(ink: InkColor) => actions.updateLayerColor(layer.id, ink)}
+                onOpacityChange={(opacity: number) => actions.updateLayerOpacity(layer.id, opacity)}
+                onScaleChange={(scale: number) => actions.updateLayerScale(layer.id, scale)}
+                onOffsetChange={(x: number, y: number) => actions.updateLayerOffset(layer.id, x, y)}
+                onImageUpload={(grayscaleData: ImageData) =>
+                  actions.setLayerImage(layer.id, grayscaleData)
+                }
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </div>
 
       <input
         ref={fileInputRef}
@@ -98,9 +100,9 @@ export function LayerList({ layers, actions, advancedEnabled, paperColor }: Laye
         onChange={handleFilesSelected}
       />
       <button
+        className="layer-list-add-btn"
         onClick={() => fileInputRef.current?.click()}
         disabled={layers.length >= MAX_LAYERS}
-        style={{ marginTop: 'auto' }}
       >
         {layers.length >= MAX_LAYERS ? 'Max layers reached' : 'Add layers'}
       </button>
