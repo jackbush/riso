@@ -92,7 +92,7 @@ body {
   gap: 0;
 }
 
-.app--zoom-full .settings-panel {
+.app--zoom-full .side-panel {
   position: fixed;
   top: var(--spacing-md);
   right: var(--spacing-md);
@@ -185,7 +185,7 @@ body {
   to { opacity: 1; }
 }
 
-.settings-panel {
+.side-panel {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
@@ -362,14 +362,14 @@ body {
   border-top: 1px solid #333333;
 }
 
-/* Settings pane keeps its natural size always — it never gives up space to
+/* Setup pane keeps its natural size always — it never gives up space to
    the layers pane below it. */
-.pane--settings {
+.pane--setup {
   flex-shrink: 0;
 }
 
 /* Layers pane: sized to its content (grows as layers are added) but never
-   beyond the space left in the sidebar. Once the settings pane above has
+   beyond the space left in the sidebar. Once the setup pane above has
    claimed its natural size, any remaining content height is squeezed out of
    this pane via flex-shrink, which in turn squeezes .layer-list-items (the
    only shrinkable child) so it — not the pane itself — becomes the thing

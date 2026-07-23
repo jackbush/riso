@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { RisoConfig } from '../types';
+import { JITTER_MAX_PCT } from '../engine/compositor';
 
 const PAPER_PRESETS = [
   { name: 'White', hex: '#FFFFFF' },
@@ -94,6 +95,21 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         </span>
       </div>
 
+      {/* Scale layers */}
+      <label className="config-item config-item--row">
+        <span className="config-label">Scale layers</span>
+        <select
+          value={config.layerFit}
+          onChange={(e) =>
+            onChange({ layerFit: e.target.value as RisoConfig['layerFit'] })
+          }
+        >
+          <option value="off">Off</option>
+          <option value="fit">Fit</option>
+          <option value="fill">Fill</option>
+        </select>
+      </label>
+
       {/* Margin */}
       <label className="config-item config-item--row">
         <span className="config-label">Margin (px)</span>
@@ -149,18 +165,18 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
         </label>
       )}
 
-      {/* Halftone */}
+      {/* Shading (halftone) */}
       <label className="config-item config-item--row">
-        <span className="config-label">Halftone pattern</span>
+        <span className="config-label">Shading</span>
         <select
           value={config.halftoneMode}
           onChange={(e) =>
             onChange({ halftoneMode: e.target.value as RisoConfig['halftoneMode'] })
           }
         >
-          <option value="stochastic">Grain</option>
           <option value="am">Dot screen</option>
-          <option value="off">Off</option>
+          <option value="stochastic">Grain</option>
+          <option value="off">Gradient</option>
         </select>
       </label>
       {config.halftoneMode === 'stochastic' && (
@@ -224,12 +240,12 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
       </label>
       {config.registrationJitterEnabled && (
         <label className="config-item config-item--row">
-          <span className="config-label">↳ Jitter amount</span>
+          <span className="config-label">↳ Jitter amount (%)</span>
           <input
             type="range"
             min={0}
-            max={10}
-            step={0.5}
+            max={JITTER_MAX_PCT}
+            step={0.02}
             value={config.registrationJitterAmount}
             onChange={(e) => onChange({ registrationJitterAmount: parseFloat(e.target.value) })}
           />

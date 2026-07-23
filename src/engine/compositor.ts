@@ -197,6 +197,11 @@ function computeDensity(
   return density;
 }
 
+// Jitter slider max, in % of the paper's larger dimension. Real riso
+// misregistration measures ~0-2mm per pass (up to ~3mm multi-pass) — about
+// 0.3-1% of an A4/A3 edge — so 2% is the realistic range plus headroom.
+export const JITTER_MAX_PCT = 2;
+
 interface LayerPlacement {
   drawX: number;
   drawY: number;
@@ -222,8 +227,18 @@ function computeLayerPlacement(
   margin: number,
 ): LayerPlacement {
   const layerScale = config.advancedLayerOptionsEnabled ? layer.scale : 1;
-  const drawW = srcW * scale * layerScale;
-  const drawH = srcH * scale * layerScale;
+
+  // Fit/fill: scale every layer to the paper's content area (margin excluded).
+  // The per-layer advanced scale multiplies on top, so a layer can be scaled
+  // twice, independently.
+  let fitScale = 1;
+  if (config.layerFit !== 'off' && srcW > 0 && srcH > 0) {
+    const pick = config.layerFit === 'fit' ? Math.min : Math.max;
+    fitScale = pick(targetW / (srcW * scale), targetH / (srcH * scale));
+  }
+
+  const drawW = srcW * scale * fitScale * layerScale;
+  const drawH = srcH * scale * fitScale * layerScale;
   let drawX = margin + (targetW - drawW) / 2;
   let drawY = margin + (targetH - drawH) / 2;
 
@@ -234,13 +249,16 @@ function computeLayerPlacement(
 
   // Registration jitter (scaled): random per-layer shift, keyed by layer id
   // + seed so it's stable across re-renders and only changes on an explicit
-  // re-roll (or a slider change).
+  // re-roll (or a slider change). The amount is a % of the paper's larger
+  // full-res dimension, so the drift stays visible at any sheet size.
   let rotationDeg = 0;
   if (config.registrationJitterEnabled) {
+    const paperMaxPx = Math.max(targetW, targetH) / scale;
     const jitter = computeRegistrationJitter(
       config.registrationJitterSeed,
-      config.registrationJitterAmount,
+      (config.registrationJitterAmount / 100) * paperMaxPx,
       layer.id,
+      config.registrationJitterAmount / JITTER_MAX_PCT,
     );
     drawX += jitter.dx * scale;
     drawY += jitter.dy * scale;

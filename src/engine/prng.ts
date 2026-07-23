@@ -37,22 +37,23 @@ export interface RegistrationJitter {
 }
 
 /**
- * Per-layer registration jitter: random X/Y shift in [-amount, +amount] px,
- * and random rotation in [-0.3, +0.3] degrees, scaled proportionally to
- * amount (rotation reaches its full ±0.3° range only at the slider max of 10px).
+ * Per-layer registration jitter: random X/Y shift in [-amountPx, +amountPx]
+ * px, and random rotation in [-0.3, +0.3] degrees scaled by `strength` — the
+ * jitter slider's fraction of its max (0-1), so rotation tracks the slider,
+ * not the paper size the px amount was derived from.
  */
 export function computeRegistrationJitter(
   seed: number,
-  amount: number,
+  amountPx: number,
   layerId: string,
+  strength = 1,
 ): RegistrationJitter {
-  if (amount <= 0) return { dx: 0, dy: 0, rotationDeg: 0 };
+  if (amountPx <= 0) return { dx: 0, dy: 0, rotationDeg: 0 };
 
   const rng = mulberry32(layerSeed(seed, layerId));
-  const dx = (rng() * 2 - 1) * amount;
-  const dy = (rng() * 2 - 1) * amount;
-  const rotationRange = (amount / 10) * 0.3;
-  const rotationDeg = (rng() * 2 - 1) * rotationRange;
+  const dx = (rng() * 2 - 1) * amountPx;
+  const dy = (rng() * 2 - 1) * amountPx;
+  const rotationDeg = (rng() * 2 - 1) * strength * 0.3;
 
   return { dx, dy, rotationDeg };
 }

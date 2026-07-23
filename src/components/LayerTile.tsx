@@ -8,7 +8,7 @@ import { prefilterForScale } from '../engine/compositor';
 
 const PREVIEW_SIZE = 86;
 
-const clampOffset = (v: number) => Math.min(100, Math.max(-100, v));
+const clampOffset = (v: number) => Math.min(10000, Math.max(-10000, v));
 
 interface LayerTileProps {
   layer: Layer;
@@ -273,8 +273,8 @@ export function LayerTile({
               <input
                 type="number"
                 className="layer-tile-field-input"
-                min={-100}
-                max={100}
+                min={-10000}
+                max={10000}
                 value={layer.offsetX}
                 onChange={(e) => onOffsetChange(clampOffset(parseInt(e.target.value, 10) || 0), layer.offsetY)}
               />
@@ -282,8 +282,8 @@ export function LayerTile({
               <input
                 type="number"
                 className="layer-tile-field-input"
-                min={-100}
-                max={100}
+                min={-10000}
+                max={10000}
                 value={layer.offsetY}
                 onChange={(e) => onOffsetChange(layer.offsetX, clampOffset(parseInt(e.target.value, 10) || 0))}
               />

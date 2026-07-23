@@ -3,18 +3,18 @@ import { LayerActions } from '../hooks/useLayerState';
 import { LayerList } from './LayerList';
 import { ConfigPanel } from './ConfigPanel';
 
-interface SettingsPanelProps {
+interface SidePanelProps {
   layers: Layer[];
   actions: LayerActions;
   config: RisoConfig;
   onConfigChange: (updates: Partial<RisoConfig>) => void;
 }
 
-export function SettingsPanel({ layers, actions, config, onConfigChange }: SettingsPanelProps) {
+export function SidePanel({ layers, actions, config, onConfigChange }: SidePanelProps) {
   return (
-    <div className="settings-panel">
-      <details className="pane pane--settings" open>
-        <summary className="pane-summary">Settings</summary>
+    <div className="side-panel">
+      <details className="pane pane--setup" open>
+        <summary className="pane-summary">Setup</summary>
         <div className="pane-body">
           <ConfigPanel config={config} onChange={onConfigChange} />
         </div>

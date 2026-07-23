@@ -81,15 +81,16 @@ describe('computeRegistrationJitter', () => {
     }
   });
 
-  it('keeps rotation within [-0.3, +0.3] degrees, scaled by amount', () => {
-    // At max amount (10), rotation should reach the full ±0.3° range
+  it('keeps rotation within [-0.3, +0.3] degrees, scaled by strength', () => {
+    // At full strength (slider at max), rotation reaches the full ±0.3° range
     for (let seed = 0; seed < 20; seed++) {
-      const { rotationDeg } = computeRegistrationJitter(seed, 10, `layer-${seed}`);
+      const { rotationDeg } = computeRegistrationJitter(seed, 50, `layer-${seed}`, 1);
       expect(Math.abs(rotationDeg)).toBeLessThanOrEqual(0.3);
     }
-    // At half amount (5), rotation should be scaled down proportionally
+    // At half strength, rotation is scaled down proportionally — regardless
+    // of the px amount, which tracks paper size, not the slider
     for (let seed = 0; seed < 20; seed++) {
-      const { rotationDeg } = computeRegistrationJitter(seed, 5, `layer-${seed}`);
+      const { rotationDeg } = computeRegistrationJitter(seed, 50, `layer-${seed}`, 0.5);
       expect(Math.abs(rotationDeg)).toBeLessThanOrEqual(0.15);
     }
   });

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { PreviewPane } from './components/PreviewPane';
-import { SettingsPanel } from './components/SettingsPanel';
+import { SidePanel } from './components/SidePanel';
 import { useLayerState, MAX_LAYERS } from './hooks/useLayerState';
 import { exportFullRes } from './engine/renderer';
 import { loadImageFile } from './engine/imageLoader';
@@ -21,15 +21,16 @@ export function App() {
     inkSpreadEnabled: true,
     inkSpreadAmount: 1.5,
     registrationJitterEnabled: true,
-    registrationJitterAmount: 2,
+    registrationJitterAmount: 0.34, // ≈1mm on an A4 long edge — a typical real-machine drift
     registrationJitterSeed: 1,
-    halftoneMode: 'stochastic',
+    halftoneMode: 'am',
     halftoneScale: 2,
     halftoneSpacing: 8,
     halftoneAngle: null,
     kubelkaMunkOrderBias: 0.3,
     paperColor: '#FFFDF5',
     paperSize: 'largest',
+    layerFit: 'off',
     margin: 0,
     safeArea: 0,
   });
@@ -97,7 +98,7 @@ export function App() {
           handleConfigChange({ registrationJitterSeed: Math.floor(Math.random() * 2 ** 31) })
         }
       />
-      <SettingsPanel
+      <SidePanel
         layers={layers}
         actions={actions}
         config={config}
