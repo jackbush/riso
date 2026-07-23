@@ -137,7 +137,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
       </label>
       {config.inkSpreadEnabled && (
         <label className="config-item config-item--row">
-          <span className="config-label">↳ Spread amount (px)</span>
+          <span className="config-label">↳ Spread amount</span>
           <input
             type="range"
             min={0}
@@ -151,7 +151,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
 
       {/* Halftone */}
       <label className="config-item config-item--row">
-        <span className="config-label">Halftone</span>
+        <span className="config-label">Halftone pattern</span>
         <select
           value={config.halftoneMode}
           onChange={(e) =>
@@ -165,7 +165,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
       </label>
       {config.halftoneMode === 'stochastic' && (
         <label className="config-item config-item--row">
-          <span className="config-label">↳ Grain size (px)</span>
+          <span className="config-label">↳ Grain size</span>
           <input
             type="range"
             min={1}
@@ -179,7 +179,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
       {config.halftoneMode === 'am' && (
         <>
           <label className="config-item config-item--row">
-            <span className="config-label">↳ Dot spacing (px)</span>
+            <span className="config-label">↳ Dot spacing</span>
             <input
               type="range"
               min={4}
@@ -224,7 +224,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
       </label>
       {config.registrationJitterEnabled && (
         <label className="config-item config-item--row">
-          <span className="config-label">↳ Jitter amount (px)</span>
+          <span className="config-label">↳ Jitter amount</span>
           <input
             type="range"
             min={0}
@@ -252,7 +252,7 @@ export function ConfigPanel({ config, onChange }: ConfigPanelProps) {
       </label>
       {config.inkBlendMode === 'km' && (
         <label className="config-item config-item--row">
-          <span className="config-label">↳ Order bias</span>
+          <span className="config-label">↳ Order weight</span>
           <input
             type="range"
             min={0}

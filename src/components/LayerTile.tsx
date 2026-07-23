@@ -39,7 +39,7 @@ export function LayerTile({
   const thumbnailRef = useRef<HTMLCanvasElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [showPicker, setShowPicker] = useState(false);
-  const [pickerPos, setPickerPos] = useState<{ left: number; top: number } | null>(null);
+  const [pickerPos, setPickerPos] = useState<{ left: number; top: number; openUpward: boolean } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState(layer.name);
@@ -157,13 +157,23 @@ export function LayerTile({
           title={layer.inkColor.name}
           onClick={(e) => {
             if (!showPicker) {
-              setPickerPos({ left: e.clientX, top: e.clientY });
+              const openUpward = window.innerHeight - e.clientY < 325;
+              setPickerPos({ left: e.clientX, top: e.clientY, openUpward });
             }
             setShowPicker((v) => !v);
           }}
         />
         {showPicker && pickerPos && (
-          <div style={{ position: 'fixed', left: pickerPos.left, top: pickerPos.top, zIndex: 100 }}>
+          <div
+            style={{
+              position: 'fixed',
+              left: pickerPos.left,
+              ...(pickerPos.openUpward
+                ? { bottom: window.innerHeight - pickerPos.top }
+                : { top: pickerPos.top }),
+              zIndex: 100,
+            }}
+          >
             <ColorPicker
               onSelect={(ink) => {
                 originalColorRef.current = ink;
